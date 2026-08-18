@@ -1,0 +1,10 @@
+.DS_Store
+.cache/
+.claude/
+.venv/
+.playwright-cli/
+output/
+__pycache__/
+*.py[cod]
+font-lab/build/
+font-lab/refs/

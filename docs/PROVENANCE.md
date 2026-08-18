@@ -1,0 +1,168 @@
+# Ultra Sans provenance
+
+This document records the exact sources, construction, licenses, and committed
+artifacts for **Ultra Sans**. Product typography roles and fallback policy belong
+to consuming applications rather than this font repository.
+
+## Ultra Sans — the product face
+
+Ultra Sans is a derivative of **DM Sans** closing three structural gaps: no
+tabular figures (`tnum` generated; stock digits span 310/1000em so
+`font-variant-numeric: tabular-nums` silently did nothing), no Greek (grafted in
+from Inter — see below), and the weakest `0`/`O` distinction of every candidate
+face measured (a generated slashed-zero alternate behind a dormant `zero`
+feature).
+
+Built by `font-lab/build_ultra_tabular.py`, which fetches the upstream
+masters, verifies them against the digests below, performs the feature additions
+and reference C/O/G + lowercase `s` redraws, renames the family, and emits
+WOFF2. The build is byte-reproducible (`head.modified` pinned to upstream), so
+the output digests below are stable and re-derivable.
+
+| Asset | Style | Variable axes | Bytes | SHA-256 |
+| --- | --- | --- | ---: | --- |
+| `UltraSans-Variable.woff2` | normal | `wght` 100–1000; `opsz` 9–40 | 126756 | `498bfe2daea07ba012de62f61829273d70be1999cb727c4bb75e48c2a2a4b80d` |
+| `UltraSans-Italic-Variable.woff2` | italic | `wght` 100–1000; `opsz` 9–40 | 154544 | `b38f97e13be2018a42afade2321c4a713c72872c7958b763dd065765033988dc` |
+
+Derived from these upstream DM Sans masters:
+
+| Upstream file | Source | SHA-256 |
+| --- | --- | --- |
+| `DMSans[opsz,wght].ttf` | `https://raw.githubusercontent.com/google/fonts/main/ofl/dmsans/DMSans%5Bopsz,wght%5D.ttf` | `8cd08d97e89c24d0aa92edd2f0f4c8ee6195eee9b7c9f154865a58b02f0c1c0d` |
+| `DMSans-Italic[opsz,wght].ttf` | `https://raw.githubusercontent.com/google/fonts/main/ofl/dmsans/DMSans-Italic%5Bopsz,wght%5D.ttf` | `22259c0cc8237221b80f44c76ba8d36e6bce3cda72779f5b2773643d499720ae` |
+
+License: SIL Open Font License 1.1, preserved verbatim as `licenses/OFL-DM-Sans.txt`
+(4389 bytes). DM Sans declares **no Reserved Font Name** — its copyright line is
+bare — so renaming and redistributing a modified version is permitted outright.
+Obligations met: the upstream copyright (name ID 0) and license (IDs 13/14) are
+carried through untouched, the derivative note is appended to the description
+rather than substituted, and Ultra Sans itself remains under OFL 1.1.
+
+### What was added, and why it is safe
+
+The numeric feature does not alter source outlines: each tabular digit is a
+**composite** of the original digit, recentred inside a shared advance, so the
+base figure and all of its variation are inherited. The deliberate exception is
+the documented `C O G Q Ø` and lowercase `s` redraws below.
+
+Three measured facts underpin the construction, all re-checked by the build:
+
+1. **`0` is the widest digit at every axis location** (verified over opsz 9–40 ×
+   wght 100–1000). So the tabular advance is exactly `advance(zero)` — a quantity
+   read from the font, not modelled.
+2. **Advances flow from gvar phantom points; HVAR is dropped.** The italic's
+   HVAR diverged from its shipped phantom deltas by up to 4 units on some glyphs,
+   so the build rebuilds every glyph's phantom advance deltas from HVAR-true
+   advances sampled at all 12 master locations (verified exact afterwards), then
+   removes HVAR. Every glyph — original, tabular, grafted — carries its advance
+   the same way.
+3. The centring shift is a *linear* function of the two advances, and gvar deltas
+   are additive, so the shift's deltas are that same linear combination of the
+   base digits' advance deltas — again exact, with no modelling.
+
+Digits are centred on their **ink**, not their advance box; centring the advance
+box left `1` 44 units off centre in its cell. The ink correction is near-constant
+across the axes (worst drift 10 units, 0.15px at 15px), so it is applied
+statically. Residual off-centring is ≤8 units (0.12px at 15px) across the weights
+Ultra actually uses, rising to 21 units only at wght 1000 / opsz 40, which Ultra
+never renders.
+
+Default figures remain **proportional**, as they should for prose; the tabular
+set is reached only through `tnum`, which is what `font-variant-numeric:
+tabular-nums` activates.
+
+### Greek, grafted in — no longer a CSS-fallback concern
+
+Stock DM Sans covers one Greek codepoint (π) out of 403 total; Ultra renders λ,
+σ, Δ, θ constantly, and the old CSS fallback could not reach canvas text
+(`ctx.font` names a single family) nor weight-match per master. The build grafts
+**104 Greek codepoints** from Inter (OFL, no Reserved Font Name), solved per
+location of the two-axis design space: DM Sans's gvar regions map to a grid of
+**12 master locations** (opsz {9, 24, 40} × wght {100, 300, 400, 1000},
+intermediates included), and at each one Inter's own axes are solved so stems
+and x/cap proportions match DM's there — plus a horizontal correction that keeps
+Greek tracking DM's width rhythm where Inter's opsz axis saturates. Deltas come
+from fontTools' VariationModel over those locations, so the graft is exact at
+every master and interpolates with the same support math as the rest of the
+font; italic grafts are additionally sheared 0.6° to DM's −10°. Verified by stem
+comparison (λ vs l) and x-height alignment (σ vs x) at Ultra's real tokens
+(wght 440/695, opsz 13), and at the axis extremes.
+
+### Reference-matched C O G Q Ø — drawn at every master
+
+The supplied small-size reference is optically corrected rather than
+mathematically circular. Its `O` is subtly vertical; `C` is narrower and more
+open; `G` is narrower than `O` and uses a long horizontal bar. At the normal
+text master, the superseded geometric treatment measured `C .927 / O 1.000 /
+G 1.000`; the redraw measures `C .825 / O .865 / G .834`. In a like-for-like
+30px raster proxy for the reference's 10–11 CSS px capture, Inter had the lowest
+mean absolute pixel error of DM Sans, the old Ultra Sans, Inter, and DM Sans Mono.
+
+Inter therefore supplies the round-cap skeleton and terminal geometry. At each
+of DM Sans's 12 `wght × opsz` master locations, the build solves the matching
+Inter optical size, solves Inter's weight again against DM's capital-round side
+stroke, scales to DM's round overshoot height, and shears italic outlines the
+0.6° needed to land on DM's −10° angle. `C O G Q Ø` are written into the
+existing DM glyph slots, retaining their names, original DM advances, and DM ink
+centres. GPOS coverage, line lengths, and surrounding spacing therefore remain
+stable while the silhouettes change. DM Sans Mono is used as the 10px
+G-bar clarity check, not an outline donor; its compressed proportions belong in
+code, not proportional body text.
+
+All samples share point structure before gvar deltas are emitted. Build-time
+verification checks the reference proportions, DM-matched stroke and overshoot,
+unchanged advances, and the original mark-to-bowl relationship in `Ç Ö Ğ`
+across regular, italic, text, display, and axis extremes. `Q` and `Ø` follow the
+same bowl system so the change does not stop at the three specimen letters.
+
+### Reference-matched lowercase s — sentence rhythm at body size
+
+The approved reference was a 24×32-device-pixel crop. At that exact raster
+height, the DM-derived Ultra `s` measured `0.782` width/height with nearly equal
+upper/lower ink mass (`0.988`); the reference measured `0.750` and `0.948`.
+Its smaller upper bowl, fuller lower bowl, stronger diagonal waist, and 2–5%
+more open exits keep repeated `s` shapes from becoming wide, dark interruptions
+inside a sentence. Inter opsz 20 / wght 430 was the closest measured source;
+changing only DM's weight or optical size did not reproduce the white shape.
+
+Inter therefore supplies the roman and italic skeleton. DM opsz `9/24/40`
+samples Inter `14/29/32`, placing Ultra's actual body setting (opsz 15 / wght
+430) near the approved opsz-20 reference. At every one of the 12 masters, the
+source is independently weight-solved against DM's lowercase stem and scaled
+uniformly to DM's exact `s` overshoot. Both original sidebearings are retained;
+the advance changes only by the ink-width delta. The normal body result is
+aspect `0.763` with an 11-unit advance reduction (about 0.17 px at 15 px), while
+extreme bold masters may widen enough to preserve their counters. Composite
+deltas keep `ś/š` and the other accented forms centred over the new base.
+
+Build-time verification pins the body silhouette, normal/italic narrowing,
+side-space, vertical overshoot, accent relationships, and interpolation across
+the complete weight and optical-size grid.
+
+### Slashed zero — capability, dormant by default
+
+`zero.slash` (plus `zero.tnum.slash` so tabular contexts compose) is generated
+per master location from the 0's own geometry — slash angle from the counter,
+thickness from the 0's own thin stroke, so it tracks both axes like a drawn
+glyph. Reached only through the `zero` OpenType feature, which nothing enables
+by default: the documented doctrine is that identity does not come from
+substituted glyphs, so defaults are untouched and data surfaces opt in with
+`font-variant-numeric: slashed-zero` where `0`/`O` ambiguity actually costs
+something (run IDs, hashes).
+
+## Inter — pinned geometry source
+
+Ultra vendors the unmodified official Inter Variable v4.1 webfont assets.
+
+| Asset | Style | Variable axes | Official source | Bytes | SHA-256 |
+| --- | --- | --- | --- | ---: | --- |
+| `InterVariable-v4.1.woff2` | normal | `wght` 100–900; `opsz` 14–32 | `https://rsms.me/inter/font-files/InterVariable.woff2?v=4.1` | 352240 | `693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3` |
+| `InterVariable-Italic-v4.1.woff2` | italic | `wght` 100–900; `opsz` 14–32 | `https://rsms.me/inter/font-files/InterVariable-Italic.woff2?v=4.1` | 387976 | `e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a` |
+
+Version: Inter 4.1. License: SIL Open Font License 1.1; the upstream
+`LICENSE.txt` for tag `v4.1` is preserved verbatim as `licenses/OFL-Inter.txt`.
+
+These two WOFF2 files are checked into `sources/inter/` as deterministic build
+inputs. Their outlines supply the reference skeleton for Greek, the round
+capitals, and lowercase `s`; the builder validates both SHA-256 digests before
+reading them. They are not Ultra Sans release artifacts.

@@ -1,0 +1,12 @@
+[project]
+name = "ultra-sans-build"
+version = "0.1.0"
+description = "Reproducible geometry builder for the Ultra Sans variable typeface"
+requires-python = ">=3.10"
+dependencies = [
+  "brotli==1.2.0",
+  "fonttools[woff]==4.62.1",
+]
+
+[tool.uv]
+package = false
