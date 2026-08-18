@@ -1,0 +1,32 @@
+{
+  "source": "docs/assets/readme-hero.html",
+  "source_sha256": "1d81ab94da9578cbe00962dc40ef9339746841938bec2dc3b1b3693295b2f318",
+  "dimensions": {
+    "width": 2400,
+    "height": 900
+  },
+  "exact_copy": [
+    "BisQue Ultra",
+    "Variable typeface \u00b7 Development 0.1",
+    "Ultra Sans",
+    "A variable typeface for an agentic system for science.",
+    "Designed by Amil Khan \u00b7 UCSB ECE"
+  ],
+  "font_inputs": {
+    "fonts/UltraSans-Variable.woff2": "f060de034541b34034450670bc9becf7c0640f57f2c23dff311ca04a7ff5c97d",
+    "fonts/UltraSans-Italic-Variable.woff2": "26470a9271f845356cfd113a15e5df9e623d440bacab5498e45ad16051e5771d"
+  },
+  "exports": {
+    "light": {
+      "path": "docs/assets/ultra-sans-hero-light.png",
+      "sha256": "068fe3639cf7619bb1bb49cd66db2473b40c4cb2d41050c8309184daf36815da"
+    },
+    "dark": {
+      "path": "docs/assets/ultra-sans-hero-dark.png",
+      "sha256": "d0d3f3c76f9fd851d96c4c127f866c5dc39dded05867b10eb6e77d18ab10ac5c"
+    }
+  },
+  "renderer": "Google Chrome 151.0.7922.138",
+  "render_script": "font-lab/render_readme_hero.py",
+  "render_script_sha256": "731315cfe628b72acc01f3a13548d70d5f98db78cd2a9415acd467fd06acc91e"
+}

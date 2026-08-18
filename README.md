@@ -1,3 +1,13 @@
+<p align="center">
+  <a href="https://amilworks.github.io/ultra-sans/">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/assets/ultra-sans-hero-dark.png">
+      <source media="(prefers-color-scheme: light)" srcset="docs/assets/ultra-sans-hero-light.png">
+      <img alt="Ultra Sans: a variable typeface for an agentic system for science, designed by Amil Khan" src="docs/assets/ultra-sans-hero-light.png" width="100%">
+    </picture>
+  </a>
+</p>
+
 # Ultra Sans
 
 Ultra Sans is the programmatically drawn typeface for BisQue Ultra. It starts
@@ -54,6 +64,17 @@ make specimen
 
 Then open [http://localhost:5310/](http://localhost:5310/).
 
+To regenerate the exact light and dark README hero exports with an installed
+Chromium-family browser:
+
+```bash
+make hero
+```
+
+Set `ULTRA_SANS_CHROME` to a browser executable when it cannot be discovered
+automatically. The renderer verifies the 2400×900 dimensions and records source,
+font, export, and browser fingerprints in `docs/assets/readme-hero-manifest.json`.
+
 ## Release artifacts
 
 | File | Style | Size | SHA-256 |
@@ -87,6 +108,7 @@ Basic web use:
 - `fonts/` — committed release artifacts
 - `sources/inter/` — exact Inter 4.1 build inputs
 - `index.html` — interactive specimen and GitHub Pages front page
+- `docs/assets/` — README hero source, theme exports, and provenance manifest
 - `docs/AUTHORSHIP.md` — formal author, affiliation, lineage, and citation record
 - `docs/PROVENANCE.md` — source identity, construction, and artifact evidence
 - `CITATION.cff` — machine-readable citation metadata

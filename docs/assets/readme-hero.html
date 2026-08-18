@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <title>Ultra Sans README hero</title>
+    <script>
+      document.documentElement.dataset.theme =
+        new URLSearchParams(window.location.search).get("theme") === "dark"
+          ? "dark"
+          : "light";
+    </script>
+    <style>
+      @font-face {
+        font-family: "Ultra Sans";
+        src: url("../../fonts/UltraSans-Variable.woff2") format("woff2");
+        font-style: normal;
+        font-weight: 100 1000;
+        font-display: block;
+      }
+
+      :root {
+        --paper: #f5f5f3;
+        --ink: #101214;
+        --muted: #686d72;
+        --rule: #d7dadd;
+        --grid: rgba(17, 19, 21, 0.028);
+        --accent: #1994ff;
+        width: 2400px;
+        height: 900px;
+        font-family: "Ultra Sans", sans-serif;
+        font-synthesis: none;
+      }
+
+      :root[data-theme="dark"] {
+        --paper: #0b0c0d;
+        --ink: #f4f5f6;
+        --muted: #959aa0;
+        --rule: #292c2f;
+        --grid: rgba(255, 255, 255, 0.026);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 2400px;
+        height: 900px;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      body {
+        padding: 54px;
+        color: var(--ink);
+        background-color: var(--paper);
+        background-image:
+          linear-gradient(var(--grid) 1px, transparent 1px),
+          linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+        background-size: 54px 54px;
+        opacity: 0;
+        text-rendering: optimizeLegibility;
+      }
+
+      html.ready body {
+        opacity: 1;
+      }
+
+      .frame {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-rows: 94px 1fr 100px;
+        border: 2px solid var(--rule);
+        background: color-mix(in srgb, var(--paper) 96%, transparent);
+      }
+
+      .topline,
+      .bottomline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+        font-size: 22px;
+        font-weight: 620;
+        letter-spacing: 0.075em;
+        text-transform: uppercase;
+      }
+
+      .topline {
+        border-bottom: 2px solid var(--rule);
+      }
+
+      .bottomline {
+        border-top: 2px solid var(--rule);
+      }
+
+      .wordmark {
+        font-size: 28px;
+        font-weight: 650;
+        letter-spacing: -0.025em;
+        text-transform: none;
+      }
+
+      .wordmark span {
+        color: var(--muted);
+        font-weight: 400;
+      }
+
+      .quiet {
+        color: var(--muted);
+      }
+
+      .content {
+        min-height: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1.42fr) minmax(620px, 0.58fr);
+      }
+
+      .identity {
+        min-width: 0;
+        display: grid;
+        align-content: center;
+        padding: 52px 60px 58px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 252px;
+        line-height: 0.83;
+        font-weight: 420;
+        letter-spacing: -0.055em;
+        font-optical-sizing: none;
+        font-variation-settings: "wght" 420, "opsz" 32;
+      }
+
+      .tagline {
+        max-width: 1220px;
+        margin: 68px 0 0;
+        font-size: 53px;
+        line-height: 1.12;
+        font-weight: 400;
+        letter-spacing: -0.025em;
+        font-optical-sizing: none;
+        font-variation-settings: "wght" 400, "opsz" 24;
+      }
+
+      .proof {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        min-width: 0;
+        padding: 40px;
+        border-left: 2px solid var(--rule);
+      }
+
+      .label {
+        color: var(--muted);
+        font-size: 20px;
+        font-weight: 650;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+      }
+
+      .rounds {
+        align-self: center;
+        font-size: 178px;
+        line-height: 0.9;
+        font-weight: 400;
+        letter-spacing: 0.018em;
+        white-space: nowrap;
+        font-optical-sizing: none;
+        font-variation-settings: "wght" 400, "opsz" 18;
+      }
+
+      .science {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        padding-top: 30px;
+        border-top: 2px solid var(--rule);
+        font-size: 88px;
+        line-height: 1;
+        font-weight: 400;
+        letter-spacing: 0.02em;
+        font-variant-numeric: slashed-zero;
+        font-optical-sizing: none;
+        font-variation-settings: "wght" 400, "opsz" 14;
+      }
+
+      .science .blue {
+        color: var(--accent);
+      }
+
+      .bottom-left,
+      .bottom-right {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+      }
+
+      .marker {
+        width: 16px;
+        height: 16px;
+        flex: 0 0 auto;
+        background: var(--accent);
+        border-radius: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <div class="topline">
+        <div class="wordmark"><span>BisQue</span> Ultra</div>
+        <div class="quiet">Variable typeface · Development 0.1</div>
+      </div>
+
+      <main class="content">
+        <section class="identity">
+          <h1>Ultra Sans</h1>
+          <p class="tagline">A variable typeface for an agentic system for science.</p>
+        </section>
+
+        <section class="proof" aria-label="Reference glyphs">
+          <div class="label">Reference glyphs</div>
+          <div class="rounds">G O C</div>
+          <div class="science"><span>s</span><span>λ</span><span>σ</span><span class="blue">0</span></div>
+        </section>
+      </main>
+
+      <div class="bottomline">
+        <div class="bottom-left">
+          <span class="marker" aria-hidden="true"></span>
+          <span>Designed by Amil Khan · UCSB ECE</span>
+        </div>
+        <div class="bottom-right quiet">
+          <span>WGHT 100–1000</span>
+          <span>OPSZ 9–40</span>
+          <span>Roman + Italic</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.fonts.ready.then(() => document.documentElement.classList.add("ready"));
+    </script>
+  </body>
+</html>
