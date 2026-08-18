@@ -3,12 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Ultra Sans is a variable typeface designed by Amil Khan for Ultra, an agentic system for science."
+    />
+    <meta name="author" content="Amil Khan" />
+    <link rel="canonical" href="https://amilworks.github.io/ultra-sans/" />
     <link rel="icon" href="data:," />
     <title>Ultra Sans — variable specimen</title>
     <style>
       @font-face {
         font-family: "Ultra Sans";
-        src: url("../fonts/UltraSans-Variable.woff2") format("woff2");
+        src: url("./fonts/UltraSans-Variable.woff2") format("woff2");
         font-style: normal;
         font-weight: 100 1000;
         font-display: swap;
@@ -16,7 +22,7 @@
 
       @font-face {
         font-family: "Ultra Sans";
-        src: url("../fonts/UltraSans-Italic-Variable.woff2") format("woff2");
+        src: url("./fonts/UltraSans-Italic-Variable.woff2") format("woff2");
         font-style: italic;
         font-weight: 100 1000;
         font-display: swap;
@@ -48,6 +54,16 @@
         text-rendering: optimizeLegibility;
       }
 
+      a {
+        color: inherit;
+        text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+        text-underline-offset: 0.2em;
+      }
+
+      a:hover {
+        text-decoration-color: currentColor;
+      }
+
       header,
       main,
       footer {
@@ -77,6 +93,12 @@
       .nav {
         display: flex;
         justify-content: space-between;
+        align-items: center;
+      }
+
+      .nav-meta {
+        display: flex;
+        gap: 20px;
         align-items: center;
       }
 
@@ -140,11 +162,13 @@
         grid-template-columns: 1fr auto;
         gap: 8px;
         align-items: center;
+        min-width: 0;
       }
 
       .control input[type="range"] {
         grid-column: 1 / -1;
         width: 100%;
+        min-width: 0;
         accent-color: var(--ink);
       }
 
@@ -218,7 +242,7 @@
       }
 
       .geometry {
-        font-size: clamp(84px, 17vw, 238px);
+        font-size: clamp(84px, 15vw, 210px);
         line-height: 0.88;
         letter-spacing: 0.015em;
         white-space: nowrap;
@@ -271,6 +295,42 @@
         gap: 14px;
       }
 
+      .colophon-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+        gap: clamp(36px, 8vw, 120px);
+        align-items: start;
+      }
+
+      .colophon-lead {
+        margin: 0;
+        max-width: 800px;
+        font-size: clamp(24px, 3.8vw, 52px);
+        line-height: 1.08;
+        letter-spacing: -0.027em;
+        font-weight: 400;
+      }
+
+      .colophon-notes {
+        display: grid;
+        gap: 20px;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.55;
+      }
+
+      .colophon-notes p {
+        margin: 0;
+      }
+
+      .colophon-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        color: var(--ink);
+        font-weight: 600;
+      }
+
       .number-row {
         display: grid;
         grid-template-columns: 1fr auto;
@@ -319,8 +379,13 @@
         .hero-bottom,
         .section-head,
         .reading-grid,
-        .numbers {
+        .numbers,
+        .colophon-grid {
           grid-template-columns: 1fr;
+        }
+
+        .nav-meta > span {
+          display: none;
         }
 
         .controls {
@@ -343,13 +408,16 @@
     <header>
       <nav class="nav">
         <div class="wordmark"><span>BisQue</span> Ultra</div>
-        <div>Variable specimen · v0.1</div>
+        <div class="nav-meta">
+          <span>Variable specimen · v0.1</span>
+          <a href="https://github.com/amilworks/ultra-sans">Source ↗</a>
+        </div>
       </nav>
       <div class="hero">
         <h1>Ultra Sans</h1>
       </div>
       <div class="hero-bottom">
-        <div class="meta">DM Sans × Inter · Programmatic geometry</div>
+        <div class="meta">Designed by Amil Khan · DM Sans × Inter</div>
         <p class="hero-copy">
           Clear at interface scale. Calm across long scientific answers.
           Distinct where data demands it.
@@ -468,10 +536,46 @@
           </article>
         </div>
       </section>
+
+      <section id="about">
+        <div class="section-head">
+          <div class="eyebrow">Authorship</div>
+          <h2>A typographic voice for an agentic system for science.</h2>
+        </div>
+        <div class="colophon-grid">
+          <p class="colophon-lead">
+            Ultra Sans was designed and authored by Amil Khan, a PhD student in
+            Electrical and Computer Engineering at the University of California,
+            Santa Barbara.
+          </p>
+          <div class="colophon-notes">
+            <p>
+              The typeface was created for Ultra, an agentic system for science. Its
+              geometry is tuned for quick interface scanning, sustained reading, and
+              precise scientific data.
+            </p>
+            <p>
+              Ultra Sans is derived from DM Sans and incorporates adapted Inter
+              geometry. The original designers and project authors remain credited;
+              the Ultra Sans authorship covers the derivative design, programmatic
+              construction, and typographic direction.
+            </p>
+            <p>
+              The UCSB affiliation identifies the author and does not imply that Ultra
+              Sans is an official University typeface or that the University endorses
+              the project.
+            </p>
+            <p class="colophon-links">
+              <a href="https://github.com/amilworks/ultra-sans/blob/main/docs/AUTHORSHIP.md">Authorship &amp; citation ↗</a>
+              <a href="https://github.com/amilworks/ultra-sans">Repository ↗</a>
+            </p>
+          </div>
+        </div>
+      </section>
     </main>
 
     <footer>
-      <span>Ultra Sans · development specimen</span>
+      <span>Ultra Sans · Designed by Amil Khan</span>
       <span>Weight 100–1000 · Optical size 9–40 · Roman + Italic</span>
     </footer>
 

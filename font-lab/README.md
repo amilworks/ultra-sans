@@ -83,7 +83,7 @@ The roman and italic use the same construction. Point structure is checked
 before variation deltas are written; the build then verifies C/O/G proportions,
 stroke agreement, cap overshoot, unchanged advances, and the mark-to-bowl
 relationships in `Ç Ö Ğ` across the axis grid. The build's verification checks
-these invariants at every master; use `specimen/index.html` at 10–16px for the
+these invariants at every master; use `index.html` at 10–16px for the
 final raster review.
 
 ### Lowercase `s`: sentence rhythm at text size

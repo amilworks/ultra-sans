@@ -4,6 +4,13 @@ Ultra Sans is the programmatically drawn typeface for BisQue Ultra. It starts
 from DM Sans, then applies measured geometry and OpenType features for dense
 scientific interfaces and sustained on-screen reading.
 
+**Designed and authored by [Amil Khan](https://www.amilworks.io)**, a PhD
+student in Electrical and Computer Engineering at the University of California,
+Santa Barbara, for **Ultra**, an agentic system for science. See the formal
+[authorship and citation statement](docs/AUTHORSHIP.md).
+
+[View the live variable specimen →](https://amilworks.github.io/ultra-sans/)
+
 This repository is the font's source of truth. Application CSS, typography
 roles, and product integration tests stay in their consuming repositories.
 
@@ -45,14 +52,14 @@ To inspect the type interactively:
 make specimen
 ```
 
-Then open [http://localhost:5310/specimen/](http://localhost:5310/specimen/).
+Then open [http://localhost:5310/](http://localhost:5310/).
 
 ## Release artifacts
 
 | File | Style | Size | SHA-256 |
 | --- | --- | ---: | --- |
-| `fonts/UltraSans-Variable.woff2` | Roman | 126,756 bytes | `498bfe2daea07ba012de62f61829273d70be1999cb727c4bb75e48c2a2a4b80d` |
-| `fonts/UltraSans-Italic-Variable.woff2` | Italic | 154,544 bytes | `b38f97e13be2018a42afade2321c4a713c72872c7958b763dd065765033988dc` |
+| `fonts/UltraSans-Variable.woff2` | Roman | 126,880 bytes | `f060de034541b34034450670bc9becf7c0640f57f2c23dff311ca04a7ff5c97d` |
+| `fonts/UltraSans-Italic-Variable.woff2` | Italic | 154,524 bytes | `26470a9271f845356cfd113a15e5df9e623d440bacab5498e45ad16051e5771d` |
 
 Basic web use:
 
@@ -79,8 +86,10 @@ Basic web use:
 - `font-lab/build_ultra_tabular.py` — adopted, deterministic geometry builder
 - `fonts/` — committed release artifacts
 - `sources/inter/` — exact Inter 4.1 build inputs
-- `specimen/` — interactive small-text and geometry review
+- `index.html` — interactive specimen and GitHub Pages front page
+- `docs/AUTHORSHIP.md` — formal author, affiliation, lineage, and citation record
 - `docs/PROVENANCE.md` — source identity, construction, and artifact evidence
+- `CITATION.cff` — machine-readable citation metadata
 - `font-lab/README.md` — detailed design research and the earlier Inter experiment
 - `licenses/` — verbatim upstream SIL Open Font License texts
 

@@ -4,6 +4,20 @@ This document records the exact sources, construction, licenses, and committed
 artifacts for **Ultra Sans**. Product typography roles and fallback policy belong
 to consuming applications rather than this font repository.
 
+## Authorship and project context
+
+Ultra Sans was designed and authored by **Amil Khan**, a PhD student in the
+Department of Electrical and Computer Engineering at the University of
+California, Santa Barbara. Khan created the family for **Ultra**, an agentic
+system for science, and directed its geometry, programmatic construction,
+OpenType features, and visual evaluation.
+
+This authorship describes the Ultra Sans derivative work. DM Sans and Inter
+retain their original credits, copyrights, and licenses as recorded below. The
+UCSB affiliation identifies the author and does not imply University endorsement
+or make Ultra Sans an official University typeface. See
+[AUTHORSHIP.md](AUTHORSHIP.md) for the formal statement and citation.
+
 ## Ultra Sans — the product face
 
 Ultra Sans is a derivative of **DM Sans** closing three structural gaps: no
@@ -21,8 +35,8 @@ the output digests below are stable and re-derivable.
 
 | Asset | Style | Variable axes | Bytes | SHA-256 |
 | --- | --- | --- | ---: | --- |
-| `UltraSans-Variable.woff2` | normal | `wght` 100–1000; `opsz` 9–40 | 126756 | `498bfe2daea07ba012de62f61829273d70be1999cb727c4bb75e48c2a2a4b80d` |
-| `UltraSans-Italic-Variable.woff2` | italic | `wght` 100–1000; `opsz` 9–40 | 154544 | `b38f97e13be2018a42afade2321c4a713c72872c7958b763dd065765033988dc` |
+| `UltraSans-Variable.woff2` | normal | `wght` 100–1000; `opsz` 9–40 | 126880 | `f060de034541b34034450670bc9becf7c0640f57f2c23dff311ca04a7ff5c97d` |
+| `UltraSans-Italic-Variable.woff2` | italic | `wght` 100–1000; `opsz` 9–40 | 154524 | `26470a9271f845356cfd113a15e5df9e623d440bacab5498e45ad16051e5771d` |
 
 Derived from these upstream DM Sans masters:
 
@@ -37,6 +51,9 @@ bare — so renaming and redistributing a modified version is permitted outright
 Obligations met: the upstream copyright (name ID 0) and license (IDs 13/14) are
 carried through untouched, the derivative note is appended to the description
 rather than substituted, and Ultra Sans itself remains under OFL 1.1.
+Name ID 9 leads with Amil Khan and retains the DM Sans and Inter design lineage;
+IDs 10–12 record the full authorship statement and project URLs. The build
+verifies both the new authorship metadata and the protected upstream records.
 
 ### What was added, and why it is safe
 

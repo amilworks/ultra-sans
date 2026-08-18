@@ -191,6 +191,23 @@ ROOT = Path(__file__).resolve().parent.parent
 BUILD_DIR = ROOT / "fonts"
 CACHE_DIR = ROOT / ".cache" / "sources"
 
+FONT_VERSION = "0.100"
+FONT_AUTHOR = "Amil Khan"
+FONT_AFFILIATION = (
+    "PhD student in the Department of Electrical and Computer Engineering at the "
+    "University of California, Santa Barbara"
+)
+FONT_PROJECT_URL = "https://github.com/amilworks/ultra-sans"
+FONT_AUTHOR_URL = "https://www.amilworks.io"
+FONT_DESIGNERS = (
+    f"{FONT_AUTHOR}; based on DM Sans by Colophon Foundry and Jonny Pinhorn; "
+    "incorporates adapted Inter geometry by The Inter Project Authors"
+)
+FONT_AUTHORSHIP_NOTE = (
+    f"Ultra Sans was designed and authored by {FONT_AUTHOR}, a {FONT_AFFILIATION}. "
+    "It was created for Ultra, an agentic system for science."
+)
+
 UPSTREAM = "https://raw.githubusercontent.com/google/fonts/main/ofl/dmsans/"
 
 # Fetched from upstream and digest-checked. These digests are recorded in
@@ -215,12 +232,12 @@ SOURCES = [
 
 EXPECTED_OUTPUTS = {
     "UltraSans-Variable.woff2": (
-        126_756,
-        "498bfe2daea07ba012de62f61829273d70be1999cb727c4bb75e48c2a2a4b80d",
+        126_880,
+        "f060de034541b34034450670bc9becf7c0640f57f2c23dff311ca04a7ff5c97d",
     ),
     "UltraSans-Italic-Variable.woff2": (
-        154_544,
-        "b38f97e13be2018a42afade2321c4a713c72872c7958b763dd065765033988dc",
+        154_524,
+        "26470a9271f845356cfd113a15e5df9e623d440bacab5498e45ad16051e5771d",
     ),
 }
 
@@ -1401,12 +1418,18 @@ def rename(font: TTFont, style: str) -> None:
     subfamily = "Italic" if style == "italic" else "Regular"
     full = f"{family} {subfamily}"
     name = font["name"]
+    font["head"].fontRevision = float(FONT_VERSION)
     for nid, value in [
         (1, family),
         (2, subfamily),
-        (3, f"{full}; Ultra derivative of DM Sans"),
+        (3, f"{FONT_VERSION};AMIL;UltraSans-{subfamily}"),
         (4, full),
+        (5, f"Version {FONT_VERSION}"),
         (6, f"{family.replace(' ', '')}-{subfamily}"),
+        (8, "Ultra"),
+        (9, FONT_DESIGNERS),
+        (11, FONT_PROJECT_URL),
+        (12, FONT_AUTHOR_URL),
         (16, family),
         (17, subfamily),
     ]:
@@ -1420,7 +1443,7 @@ def rename(font: TTFont, style: str) -> None:
         "slashed-zero alternate (zero). Remaining DM outlines are retained. "
         "Inter-derived glyphs: Copyright "
         "2016 The Inter Project Authors (https://github.com/rsms/inter), SIL OFL "
-        "1.1, no Reserved Font Name."
+        f"1.1, no Reserved Font Name. {FONT_AUTHORSHIP_NOTE}"
     )
     name.setName((existing + " " + note).strip(), 10, 3, 1, 0x409)
 
@@ -1459,6 +1482,31 @@ def verify(path: Path, style: str) -> list[str]:
 
     # ---- Greek graft: presence, stem match at real tokens, x-height alignment
     base = TTFont(io.BytesIO(raw))
+    expected_subfamily = "Italic" if style == "italic" else "Regular"
+    expected_names = {
+        1: "Ultra Sans",
+        2: expected_subfamily,
+        3: f"{FONT_VERSION};AMIL;UltraSans-{expected_subfamily}",
+        5: f"Version {FONT_VERSION}",
+        8: "Ultra",
+        9: FONT_DESIGNERS,
+        11: FONT_PROJECT_URL,
+        12: FONT_AUTHOR_URL,
+    }
+    for name_id, expected in expected_names.items():
+        record = base["name"].getName(name_id, 3, 1, 0x409)
+        actual = record.toUnicode() if record else None
+        if actual != expected:
+            problems.append(
+                f"{style}: name ID {name_id} is {actual!r}; expected {expected!r}"
+            )
+    description = base["name"].getName(10, 3, 1, 0x409)
+    if description is None or FONT_AUTHORSHIP_NOTE not in description.toUnicode():
+        problems.append(f"{style}: name ID 10 is missing the authorship statement")
+    if abs(base["head"].fontRevision - float(FONT_VERSION)) > 0.0001:
+        problems.append(
+            f"{style}: font revision {base['head'].fontRevision}; expected {FONT_VERSION}"
+        )
     cm = base.getBestCmap()
     for ch in "λσΔθαβγφωΩςΣΦ":
         if ord(ch) not in cm:
@@ -1511,6 +1559,22 @@ def verify(path: Path, style: str) -> list[str]:
 
     # ---- reference-matched round capitals + lowercase s: proportions and metrics
     up_raw = fetch_source(*[source[:3] for source in SOURCES if source[4] == style][0])
+    upstream_font = TTFont(io.BytesIO(up_raw))
+    for name_id in (0, 13, 14):
+        upstream_values = sorted(
+            record.toUnicode()
+            for record in upstream_font["name"].names
+            if record.nameID == name_id
+        )
+        derivative_values = sorted(
+            record.toUnicode()
+            for record in base["name"].names
+            if record.nameID == name_id
+        )
+        if derivative_values != upstream_values:
+            problems.append(
+                f"{style}: protected upstream name ID {name_id} changed"
+            )
     locations = (
         (400, 9),
         (100, 9),
@@ -1759,7 +1823,7 @@ def main() -> int:
         for p in problems:
             print(f"  - {p}")
         return 1
-    print("\nAll tabular-figure checks passed.")
+    print("\nAll Ultra Sans build checks passed.")
     return 0
 
 

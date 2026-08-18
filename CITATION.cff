@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use Ultra Sans, please cite it using the metadata in this file."
+title: "Ultra Sans"
+type: software
+abstract: >-
+  A variable typeface designed for Ultra, an agentic system for science, with
+  programmatically constructed geometry for scientific interfaces, sustained
+  on-screen reading, and data-rich displays.
+authors:
+  - family-names: "Khan"
+    given-names: "Amil"
+    affiliation: "Department of Electrical and Computer Engineering, University of California, Santa Barbara"
+version: "0.1.0-development"
+repository-code: "https://github.com/amilworks/ultra-sans"
+url: "https://amilworks.github.io/ultra-sans/"
+license: "OFL-1.1"
+keywords:
+  - "typeface"
+  - "variable font"
+  - "scientific interface"
+  - "agentic system"
