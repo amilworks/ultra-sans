@@ -29,14 +29,14 @@ feature).
 
 Built by `font-lab/build_ultra_tabular.py`, which fetches the upstream
 masters, verifies them against the digests below, performs the feature additions
-and reference C/O/G + lowercase `s` redraws, renames the family, and emits
-WOFF2. The build is byte-reproducible (`head.modified` pinned to upstream), so
-the output digests below are stable and re-derivable.
+and reference C/O/G, lowercase `s`, and question-mark redraws, renames the
+family, and emits WOFF2. The build is byte-reproducible (`head.modified` pinned
+to upstream), so the output digests below are stable and re-derivable.
 
 | Asset | Style | Variable axes | Bytes | SHA-256 |
 | --- | --- | --- | ---: | --- |
-| `UltraSans-Variable.woff2` | normal | `wght` 100–1000; `opsz` 9–40 | 126880 | `f060de034541b34034450670bc9becf7c0640f57f2c23dff311ca04a7ff5c97d` |
-| `UltraSans-Italic-Variable.woff2` | italic | `wght` 100–1000; `opsz` 9–40 | 154524 | `26470a9271f845356cfd113a15e5df9e623d440bacab5498e45ad16051e5771d` |
+| `UltraSans-Variable.woff2` | normal | `wght` 100–1000; `opsz` 9–40 | 127248 | `b7fff4a81ec342f76d4a88625a450699112a94a2e3280e8d4ad366adbe01221c` |
+| `UltraSans-Italic-Variable.woff2` | italic | `wght` 100–1000; `opsz` 9–40 | 155152 | `f136650cad07ed6c74ef2bdaf580cba947f14ef4d4978d27d2063ab72d1783d4` |
 
 Derived from these upstream DM Sans masters:
 
@@ -59,8 +59,9 @@ verifies both the new authorship metadata and the protected upstream records.
 
 The numeric feature does not alter source outlines: each tabular digit is a
 **composite** of the original digit, recentred inside a shared advance, so the
-base figure and all of its variation are inherited. The deliberate exception is
-the documented `C O G Q Ø` and lowercase `s` redraws below.
+base figure and all of its variation are inherited. The deliberate exceptions
+are the documented `C O G Q Ø`, lowercase `s`, and question-mark redraws
+below.
 
 Three measured facts underpin the construction, all re-checked by the build:
 
@@ -156,6 +157,25 @@ Build-time verification pins the body silhouette, normal/italic narrowing,
 side-space, vertical overshoot, accent relationships, and interpolation across
 the complete weight and optical-size grid.
 
+### Reference-matched question marks — open at interface scale
+
+The previous DM-derived `?` turned inward early and placed its neck and dot far
+left of the hook's optical centre. In the Ultra welcome headline this could read
+like a `P` followed by a detached dot. The approved reference instead uses a
+broad open hook, a later inward turn, a short upright neck, and a circular dot
+on the same optical axis.
+
+Ultra reconstructs `?` and `¿` at every master from Inter's curve scaffold,
+height- and weight-fitted to DM Sans. DM optical sizes `9/24/40` map to Inter
+`14/29/32`; each source weight is solved after scaling against DM's lowercase
+stem. The hook width is then set by Ultra's own weight-and-optical-size curve,
+while the dot is re-rounded and aligned to the neck in roman and italic.
+
+The original DM advances, vertical endpoints, and ink centres are retained.
+Build-time verification checks those metrics plus contour compatibility, hook
+openness, dot roundness, hook-to-dot separation, and neck alignment at the full
+master grid and at the product headline setting (`wght` 350, `opsz` 13).
+
 ### Slashed zero — capability, dormant by default
 
 `zero.slash` (plus `zero.tnum.slash` so tabular contexts compose) is generated
@@ -181,5 +201,5 @@ Version: Inter 4.1. License: SIL Open Font License 1.1; the upstream
 
 These two WOFF2 files are checked into `sources/inter/` as deterministic build
 inputs. Their outlines supply the reference skeleton for Greek, the round
-capitals, and lowercase `s`; the builder validates both SHA-256 digests before
-reading them. They are not Ultra Sans release artifacts.
+capitals, lowercase `s`, and question marks; the builder validates both SHA-256
+digests before reading them. They are not Ultra Sans release artifacts.

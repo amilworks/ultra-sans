@@ -32,6 +32,7 @@ roles, and product integration tests stay in their consuming repositories.
 - variable roman and italic, `wght` 100–1000 and `opsz` 9–40
 - reference-matched `C O G Q Ø` geometry across the full design space
 - a narrower, asymmetric lowercase `s` tuned for sentence rhythm at text sizes
+- open `?` and `¿` forms with centred necks and round dots at every master
 - 104 Greek codepoints grafted from Inter and matched at every master
 - real tabular figures behind the `tnum` OpenType feature
 - a generated slashed zero behind the dormant `zero` feature
@@ -79,8 +80,8 @@ font, export, and browser fingerprints in `docs/assets/readme-hero-manifest.json
 
 | File | Style | Size | SHA-256 |
 | --- | --- | ---: | --- |
-| `fonts/UltraSans-Variable.woff2` | Roman | 126,880 bytes | `f060de034541b34034450670bc9becf7c0640f57f2c23dff311ca04a7ff5c97d` |
-| `fonts/UltraSans-Italic-Variable.woff2` | Italic | 154,524 bytes | `26470a9271f845356cfd113a15e5df9e623d440bacab5498e45ad16051e5771d` |
+| `fonts/UltraSans-Variable.woff2` | Roman | 127,248 bytes | `b7fff4a81ec342f76d4a88625a450699112a94a2e3280e8d4ad366adbe01221c` |
+| `fonts/UltraSans-Italic-Variable.woff2` | Italic | 155,152 bytes | `f136650cad07ed6c74ef2bdaf580cba947f14ef4d4978d27d2063ab72d1783d4` |
 
 Basic web use:
 
