@@ -1,6 +1,6 @@
 """Ultra Sans — DM Sans with reference-matched geometry and product features.
 
-Five product needs are handled in the font rather than around it:
+Six product needs are handled in the font rather than around it:
 
 **Tabular figures.** DM Sans ships no `tnum` feature and proportional digits
 (310/1000em spread), so `font-variant-numeric: tabular-nums` had nothing to
@@ -24,6 +24,12 @@ and more open exits remain legible without making repeated `s` shapes widen a
 sentence. Inter's opsz-20 `s` was the closest measured source. This build fits
 that progression across Ultra's two axes, preserving DM's height and side
 bearings while letting the advance follow the narrower ink at body settings.
+
+**Question mark.** DM Sans's default mark turns inward so early that its hook
+reads like a `P` at UI sizes. Ultra redraws `?` and `¿` from a fitted Inter
+scaffold, then gives the upper hook an Ultra-specific width progression. The
+neck and round dot share one optical centre, while DM's advance, vertical
+extent, and surrounding spacing remain unchanged.
 
 **`0`/`O` ambiguity.** DM Sans's zero measured the weakest of every candidate
 face (divergence 0.44; only 13% narrower than O). A generated slashed-zero
@@ -191,7 +197,7 @@ ROOT = Path(__file__).resolve().parent.parent
 BUILD_DIR = ROOT / "fonts"
 CACHE_DIR = ROOT / ".cache" / "sources"
 
-FONT_VERSION = "0.100"
+FONT_VERSION = "0.101"
 FONT_AUTHOR = "Amil Khan"
 FONT_AFFILIATION = (
     "PhD student in the Department of Electrical and Computer Engineering at the "
@@ -232,12 +238,12 @@ SOURCES = [
 
 EXPECTED_OUTPUTS = {
     "UltraSans-Variable.woff2": (
-        126_880,
-        "f060de034541b34034450670bc9becf7c0640f57f2c23dff311ca04a7ff5c97d",
+        127_248,
+        "b7fff4a81ec342f76d4a88625a450699112a94a2e3280e8d4ad366adbe01221c",
     ),
     "UltraSans-Italic-Variable.woff2": (
-        154_524,
-        "26470a9271f845356cfd113a15e5df9e623d440bacab5498e45ad16051e5771d",
+        155_152,
+        "f136650cad07ed6c74ef2bdaf580cba947f14ef4d4978d27d2063ab72d1783d4",
     ),
 }
 
@@ -1065,6 +1071,265 @@ def redraw_lowercase_s(
     report.append(f"    redrew lowercase s at 12 masters; {composite_count} composites re-centred")
 
 
+QUESTION_CHARS = ("?", "¿")
+
+
+def _solve_inter_question_weight(
+    inter_raw: bytes,
+    dm_instance: TTFont,
+    inter_opsz: int,
+    cache_key: str,
+    char: str,
+) -> int:
+    """Match the fitted question-mark colour to DM's lowercase stem.
+
+    The source mark is scaled to DM's punctuation height before its weight is
+    compared. This matters at the optical-size extremes: comparing raw Inter
+    units would make the text cut too light and the display cut too dark.
+    """
+    target = _measures(dm_instance)["stem"]
+    dm_height = glyph_height(dm_instance, char)
+    samples = []
+    for weight in (100, 300, 500, 700, 900):
+        instance = _instance(
+            inter_raw,
+            cache_key,
+            {"wght": weight, "opsz": inter_opsz},
+        )
+        scale = dm_height / glyph_height(instance, char)
+        samples.append((weight, _measures(instance)["stem"] * scale))
+    if target <= samples[0][1]:
+        return 100
+    if target >= samples[-1][1]:
+        return 900
+    for (weight_a, stem_a), (weight_b, stem_b) in zip(samples, samples[1:]):
+        if stem_a <= target <= stem_b:
+            solved = weight_a + (target - stem_a) * (weight_b - weight_a) / (
+                stem_b - stem_a
+            )
+            return round(solved)
+    raise SystemExit(f"{char} weight solve did not bracket the target stem")
+
+
+def redraw_question_marks(
+    font: TTFont,
+    raw: bytes,
+    inter_path: Path,
+    italic: bool,
+    report: list[str],
+) -> None:
+    """Draw Ultra's centred, open question-mark system at all 12 masters.
+
+    The approved reference has four recognisable decisions: a broad open hook,
+    a late inward turn, a short upright neck, and a round dot directly beneath
+    that neck. DM Sans's hook turns inward early and leaves most of its mass to
+    the right, which can read like a `P` at UI sizes. Inter provides a clean
+    curve scaffold, but Ultra owns the proportions: a formula widens the hook
+    gently with weight and optical size while the dot remains circular.
+
+    Each fitted source is height- and weight-matched to its DM master. The DM
+    advance, vertical endpoints, and optical ink centre are retained exactly,
+    so sentence spacing and punctuation rhythm do not move. `¿` receives the
+    same construction for language consistency rather than becoming a stale
+    upside-down relative of the new `?`.
+    """
+    inter_raw = inter_path.read_bytes()
+    cache_key = "question-it" if italic else "question-ro"
+    shear = (
+        math.tan(math.radians(-DM_ITALIC_ANGLE))
+        - math.tan(math.radians(-INTER_ITALIC_ANGLE))
+        if italic
+        else 0.0
+    )
+    inter_opsz_by_dm = {9: 14, 24: 29, 40: 32}
+    model = VariationModel([normalized for normalized, _ in MASTER_GRID])
+    cmap = font.getBestCmap()
+
+    for char in QUESTION_CHARS:
+        name = cmap[ord(char)]
+        samples = []
+        reference_ends = None
+        reference_flags = None
+        solved_locations = []
+
+        for _, (weight, optical_size) in MASTER_GRID:
+            dm_instance = _instance(
+                raw,
+                "dm-" + cache_key,
+                {"wght": weight, "opsz": optical_size},
+            )
+            inter_opsz = inter_opsz_by_dm[optical_size]
+            inter_weight = _solve_inter_question_weight(
+                inter_raw,
+                dm_instance,
+                inter_opsz,
+                cache_key,
+                char,
+            )
+            inter_instance = _instance(
+                inter_raw,
+                cache_key,
+                {"wght": inter_weight, "opsz": inter_opsz},
+            )
+
+            dm_name = dm_instance.getBestCmap()[ord(char)]
+            dm_glyph = dm_instance["glyf"][dm_name]
+            dm_coordinates, _, _ = dm_glyph.getCoordinates(dm_instance["glyf"])
+            dm_points = list(dm_coordinates)
+            old_x_min = min(point[0] for point in dm_points)
+            old_x_max = max(point[0] for point in dm_points)
+            old_y_min = min(point[1] for point in dm_points)
+            old_y_max = max(point[1] for point in dm_points)
+            old_center = (old_x_min + old_x_max) / 2
+            old_height = old_y_max - old_y_min
+            old_advance = dm_instance["hmtx"][dm_name][0]
+
+            inter_name = inter_instance.getBestCmap()[ord(char)]
+            inter_glyph = inter_instance["glyf"][inter_name]
+            inter_coordinates, _, _ = inter_glyph.getCoordinates(
+                inter_instance["glyf"]
+            )
+            inter_points = list(inter_coordinates)
+            inter_y_min = min(point[1] for point in inter_points)
+            inter_y_max = max(point[1] for point in inter_points)
+            scale = old_height / (inter_y_max - inter_y_min)
+
+            def transform(point, uniform_scale=scale, source_y_min=inter_y_min):
+                x, y = point
+                y = old_y_min + (y - source_y_min) * uniform_scale
+                x *= uniform_scale
+                return x + shear * y, y
+
+            coordinates, ends, flags, _ = _pen_arrays(
+                inter_instance,
+                inter_name,
+                transform,
+            )
+            if reference_ends is None:
+                reference_ends = ends
+                reference_flags = flags
+            elif ends != reference_ends or flags != reference_flags:
+                raise SystemExit(
+                    f"question-mark redraw {char}: point structure diverged across masters"
+                )
+
+            # The larger contour is the hook. Scale only that contour so the
+            # dot keeps the circular proportions supplied by the uniform fit.
+            ranges = []
+            start = 0
+            for end in ends:
+                ranges.append(range(start, end + 1))
+                start = end + 1
+            hook_range = max(
+                ranges,
+                key=lambda indices: (
+                    max(coordinates[index][0] for index in indices)
+                    - min(coordinates[index][0] for index in indices)
+                )
+                * (
+                    max(coordinates[index][1] for index in indices)
+                    - min(coordinates[index][1] for index in indices)
+                ),
+            )
+            hook_x_min = min(coordinates[index][0] for index in hook_range)
+            hook_x_max = max(coordinates[index][0] for index in hook_range)
+            hook_center = (hook_x_min + hook_x_max) / 2
+            weight_progress = (weight - 100) / 900
+            optical_progress = (optical_size - 9) / 31
+            target_width_ratio = (
+                0.74
+                + 0.12 * weight_progress**0.85
+                + 0.035 * optical_progress
+            )
+            target_hook_width = old_advance * target_width_ratio
+            hook_scale = target_hook_width / (hook_x_max - hook_x_min)
+            hook_indices = set(hook_range)
+            coordinates = [
+                (
+                    hook_center + (x - hook_center) * hook_scale,
+                    y,
+                )
+                if index in hook_indices
+                else (x, y)
+                for index, (x, y) in enumerate(coordinates)
+            ]
+
+            # Inter's italic dot is slightly wider and sits left of its neck.
+            # Re-round and align it after the hook fit so both roman and italic
+            # share the reference's calm, single-axis punctuation gesture.
+            dot_range = min(
+                ranges,
+                key=lambda indices: (
+                    max(coordinates[index][0] for index in indices)
+                    - min(coordinates[index][0] for index in indices)
+                )
+                * (
+                    max(coordinates[index][1] for index in indices)
+                    - min(coordinates[index][1] for index in indices)
+                ),
+            )
+            hook_x_min = min(coordinates[index][0] for index in hook_range)
+            hook_x_max = max(coordinates[index][0] for index in hook_range)
+            hook_y_min = min(coordinates[index][1] for index in hook_range)
+            hook_y_max = max(coordinates[index][1] for index in hook_range)
+            neck_band = max(16.0, (hook_y_max - hook_y_min) * 0.08)
+            neck_points = [
+                coordinates[index]
+                for index in hook_range
+                if (
+                    coordinates[index][1] <= hook_y_min + neck_band
+                    if char == "?"
+                    else coordinates[index][1] >= hook_y_max - neck_band
+                )
+            ]
+            neck_center = (
+                min(point[0] for point in neck_points)
+                + max(point[0] for point in neck_points)
+            ) / 2
+            dot_x_min = min(coordinates[index][0] for index in dot_range)
+            dot_x_max = max(coordinates[index][0] for index in dot_range)
+            dot_y_min = min(coordinates[index][1] for index in dot_range)
+            dot_y_max = max(coordinates[index][1] for index in dot_range)
+            dot_center = (dot_x_min + dot_x_max) / 2
+            dot_rounding = (dot_y_max - dot_y_min) / (dot_x_max - dot_x_min)
+            dot_shift = neck_center - dot_center
+            dot_indices = set(dot_range)
+            coordinates = [
+                (
+                    dot_center + (x - dot_center) * dot_rounding + dot_shift,
+                    y,
+                )
+                if index in dot_indices
+                else (x, y)
+                for index, (x, y) in enumerate(coordinates)
+            ]
+
+            # Preserve DM's established punctuation position even though the
+            # internal mass now sits much closer to the centre of the hook.
+            new_x_min = min(point[0] for point in coordinates)
+            new_x_max = max(point[0] for point in coordinates)
+            center_shift = old_center - (new_x_min + new_x_max) / 2
+            coordinates = [(x + center_shift, y) for x, y in coordinates]
+            samples.append((coordinates, ends, flags, old_advance))
+            solved_locations.append((weight, optical_size, inter_weight, inter_opsz))
+
+        _replace_outline(font, name, samples, model)
+        for weight, optical_size, inter_weight, inter_opsz in solved_locations:
+            if char == "?" and (weight, optical_size) in (
+                (100, 9),
+                (400, 9),
+                (1000, 9),
+                (400, 40),
+                (1000, 40),
+            ):
+                report.append(
+                    f"    question mark DM({weight:4d},{optical_size:2d}) "
+                    f"<- Inter({inter_weight:3d},{inter_opsz:2d})"
+                )
+
+    report.append("    redrew ?/¿ at 12 masters with DM metrics preserved")
+
+
 def _scan_runs(font: TTFont, name: str, y: float) -> list[float]:
     """Ink runs crossing height y, polyline-approximated — used for stroke bands."""
     g = font["glyf"][name]
@@ -1439,8 +1704,9 @@ def rename(font: TTFont, style: str) -> None:
         "Ultra Sans is a derivative of DM Sans: generated tabular figures (tnum), "
         "Greek grafted from weight- and proportion-matched Inter instances across "
         "the full two-axis design space, reference-matched C/O/G/Q/Oslash and "
-        "lowercase s redrawn from fitted Inter instances, and a generated "
-        "slashed-zero alternate (zero). Remaining DM outlines are retained. "
+        "lowercase s plus question/inverted-question redrawn from fitted Inter "
+        "instances, and a generated slashed-zero alternate (zero). Remaining DM "
+        "outlines are retained. "
         "Inter-derived glyphs: Copyright "
         "2016 The Inter Project Authors (https://github.com/rsms/inter), SIL OFL "
         f"1.1, no Reserved Font Name. {FONT_AUTHORSHIP_NOTE}"
@@ -1557,7 +1823,7 @@ def verify(path: Path, style: str) -> list[str]:
     if "HVAR" in base:
         problems.append(f"{style}: HVAR still present; advances must flow from phantoms only")
 
-    # ---- reference-matched round capitals + lowercase s: proportions and metrics
+    # ---- reference-matched letters + punctuation: proportions and metrics
     up_raw = fetch_source(*[source[:3] for source in SOURCES if source[4] == style][0])
     upstream_font = TTFont(io.BytesIO(up_raw))
     for name_id in (0, 13, 14):
@@ -1581,6 +1847,7 @@ def verify(path: Path, style: str) -> list[str]:
         (1000, 9),
         (440, 9),
         (695, 9),
+        (350, 13),
         (430, 15),
         (400, 24),
         (1000, 40),
@@ -1596,6 +1863,32 @@ def verify(path: Path, style: str) -> list[str]:
             max(point[0] for point in points),
             max(point[1] for point in points),
         )
+
+    def contour_data(test_font: TTFont, char: str) -> list[dict]:
+        glyph_name = test_font.getBestCmap()[ord(char)]
+        coordinates, ends, _ = test_font["glyf"][glyph_name].getCoordinates(
+            test_font["glyf"]
+        )
+        points = list(coordinates)
+        contours = []
+        start = 0
+        for end in ends:
+            contour_points = points[start : end + 1]
+            box = (
+                min(point[0] for point in contour_points),
+                min(point[1] for point in contour_points),
+                max(point[0] for point in contour_points),
+                max(point[1] for point in contour_points),
+            )
+            contours.append(
+                {
+                    "points": contour_points,
+                    "box": box,
+                    "area": (box[2] - box[0]) * (box[3] - box[1]),
+                }
+            )
+            start = end + 1
+        return contours
 
     def mark_relationship(test_font: TTFont, composite: str, base_char: str):
         glyph = test_font["glyf"][composite]
@@ -1669,6 +1962,105 @@ def verify(path: Path, style: str) -> list[str]:
                     "expected a 5-25 unit narrowing with side-space preserved"
                 )
 
+        for question_char in QUESTION_CHARS:
+            question_box = glyph_box(instance, question_char)
+            upstream_question_box = glyph_box(upstream, question_char)
+            question_name = instance.getBestCmap()[ord(question_char)]
+            upstream_question_name = upstream.getBestCmap()[ord(question_char)]
+            question_advance = instance["hmtx"][question_name][0]
+            upstream_question_advance = upstream["hmtx"][upstream_question_name][0]
+            if question_advance != upstream_question_advance:
+                problems.append(
+                    f"{style} ({weight},{optical_size}): {question_char} advance "
+                    f"{question_advance:.0f} vs DM {upstream_question_advance:.0f}"
+                )
+            for axis, label in ((1, "bottom"), (3, "top")):
+                if abs(question_box[axis] - upstream_question_box[axis]) > 2:
+                    problems.append(
+                        f"{style} ({weight},{optical_size}): {question_char} {label} "
+                        f"{question_box[axis]:.0f} vs DM {upstream_question_box[axis]:.0f}"
+                    )
+
+        question_contours = contour_data(instance, "?")
+        upstream_question_contours = contour_data(upstream, "?")
+        if len(question_contours) != 2:
+            problems.append(
+                f"{style} ({weight},{optical_size}): question mark has "
+                f"{len(question_contours)} contours; expected hook + dot"
+            )
+        else:
+            hook = max(question_contours, key=lambda contour: contour["area"])
+            dot = min(question_contours, key=lambda contour: contour["area"])
+            hook_box = hook["box"]
+            dot_box = dot["box"]
+            hook_width = hook_box[2] - hook_box[0]
+            hook_height = hook_box[3] - hook_box[1]
+            dot_width = dot_box[2] - dot_box[0]
+            dot_height = dot_box[3] - dot_box[1]
+            hook_ratio = hook_width / question_advance
+            dot_aspect = dot_width / dot_height
+            gap = hook_box[1] - dot_box[3]
+            if not 0.70 <= hook_ratio <= 0.92:
+                problems.append(
+                    f"{style} ({weight},{optical_size}): question hook/advance "
+                    f"ratio {hook_ratio:.3f} lost the open Ultra proportion"
+                )
+            if not 0.90 <= dot_aspect <= 1.10:
+                problems.append(
+                    f"{style} ({weight},{optical_size}): question dot aspect "
+                    f"{dot_aspect:.3f} is not optically round"
+                )
+            weight_progress = (weight - 100) / 900
+            maximum_gap = 175 - 50 * weight_progress
+            if not 25 <= gap <= maximum_gap:
+                problems.append(
+                    f"{style} ({weight},{optical_size}): question hook/dot gap "
+                    f"{gap:.0f} is outside the readable range (max {maximum_gap:.0f})"
+                )
+
+            neck_band = max(16.0, hook_height * 0.08)
+            neck_points = [
+                point
+                for point in hook["points"]
+                if point[1] <= hook_box[1] + neck_band
+            ]
+            if not neck_points:
+                problems.append(
+                    f"{style} ({weight},{optical_size}): question neck could not be measured"
+                )
+            else:
+                neck_center = (
+                    min(point[0] for point in neck_points)
+                    + max(point[0] for point in neck_points)
+                ) / 2
+                dot_center = (dot_box[0] + dot_box[2]) / 2
+                if abs(neck_center - dot_center) > question_advance * 0.04:
+                    problems.append(
+                        f"{style} ({weight},{optical_size}): question dot/neck "
+                        f"misalignment {dot_center - neck_center:+.0f} units"
+                    )
+
+            if (weight, optical_size) == (350, 13):
+                upstream_hook = max(
+                    upstream_question_contours,
+                    key=lambda contour: contour["area"],
+                )
+                upstream_hook_width = (
+                    upstream_hook["box"][2] - upstream_hook["box"][0]
+                )
+                if hook_width >= upstream_hook_width * 0.98:
+                    problems.append(
+                        f"{style} reference question hook did not become more compact "
+                        f"({hook_width:.0f} vs DM {upstream_hook_width:.0f})"
+                    )
+                full_center = (question_box[0] + question_box[2]) / 2
+                dot_center = (dot_box[0] + dot_box[2]) / 2
+                if abs(dot_center - full_center) > question_advance * 0.06:
+                    problems.append(
+                        f"{style} reference question dot remains off-centre by "
+                        f"{dot_center - full_center:+.0f} units"
+                    )
+
         boxes = {char: glyph_box(instance, char) for char in ROUND_CAP_CHARS}
         widths = {char: box[2] - box[0] for char, box in boxes.items()}
         heights = {char: box[3] - box[1] for char, box in boxes.items()}
@@ -1740,7 +2132,9 @@ def verify(path: Path, style: str) -> list[str]:
                     f"{style} ({weight},{optical_size}): {composite} mark relationship "
                     f"{relationship:.0f} vs DM {upstream_relationship:.0f}"
                 )
-    print(f"  verified reference-matched round capitals + lowercase s ({style})")
+    print(
+        f"  verified reference-matched round capitals + lowercase s + question marks ({style})"
+    )
     print(f"  verified Greek graft + slashed zero ({style})")
     return problems
 
@@ -1766,6 +2160,13 @@ def build_one(url_name: str, local_name: str, sha256: str, dst_name: str, style:
         report,
     )
     redraw_lowercase_s(
+        font,
+        raw,
+        INTER_ITALIC if style == "italic" else INTER_ROMAN,
+        style == "italic",
+        report,
+    )
+    redraw_question_marks(
         font,
         raw,
         INTER_ITALIC if style == "italic" else INTER_ROMAN,

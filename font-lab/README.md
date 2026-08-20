@@ -5,7 +5,7 @@ derivative typefaces without a font editor or proprietary outline source.
 
 | Script | Base | What it does | Status |
 | --- | --- | --- | --- |
-| `build_ultra_tabular.py` | DM Sans + Inter | `tnum` + Greek graft + reference C/O/G and `s` + dormant slashed zero | **ADOPTED — the shipping product face (Ultra Sans)** |
+| `build_ultra_tabular.py` | DM Sans + Inter | `tnum` + Greek graft + reference C/O/G, `s`, and question marks + dormant slashed zero | **ADOPTED — the shipping product face (Ultra Sans)** |
 | `build_ultra_sans.py` | Inter v4.1 | Bakes Inter's alternates in as defaults | Explored, never adopted |
 
 The adopted build emits the committed release files in `../fonts/`. The Inter
@@ -26,8 +26,8 @@ Ultra's right-aligned numeric columns staggered. CSS cannot fix that; it needs
 glyphs. This adds ten `<digit>.tnum` composites plus the feature — and, since
 the same rebuild: **104 Greek codepoints grafted from Inter** (solved per master
 location over the wght x opsz grid, horizontal-corrected where Inter's opsz
-saturates), **reference-matched C/O/G and lowercase `s` outlines**, and a
-**generated slashed zero** behind a dormant `zero` feature.
+saturates), **reference-matched C/O/G, lowercase `s`, and question-mark
+outlines**, and a **generated slashed zero** behind a dormant `zero` feature.
 
 Three measured facts keep it exact rather than modelled — see the module
 docstring for the full reasoning:
@@ -108,6 +108,27 @@ spacing. Composite deltas keep the accents in `ś/š` centred over the new base.
 The normal body result is aspect `0.763` with an 11-unit advance reduction
 (about 0.17 px at 15 px). Verification pins that body silhouette, side-space,
 overshoot, italic narrowing, accent relationships, and axis interpolation.
+
+### Question marks: open hook, centred gesture
+
+DM Sans's question mark turns inward early and places its neck and dot well to
+the left of the hook's visual centre. At interface scale that silhouette can
+read as a `P` followed by a dot. The approved reference instead uses a broad
+open hook, a late inward turn, a short neck, and a round dot on the same optical
+axis.
+
+Ultra rebuilds both `?` and `¿` at all 12 masters from a fitted Inter scaffold.
+The source optical size follows DM `9/24/40` to Inter `14/29/32`, and every
+source weight is solved after scaling against DM's lowercase stem. An
+Ultra-specific width curve keeps light text cuts compact, then opens the hook
+gradually with weight and optical size. The dot is re-rounded and centred under
+the neck in both roman and italic.
+
+DM's advance, vertical endpoints, and established ink centre remain unchanged,
+so existing line lengths and punctuation spacing do not move. Verification
+checks master compatibility, advance and endpoint preservation, hook aperture,
+dot roundness, neck alignment, and the 350/13 setting used by Ultra's welcome
+headline.
 
 ## `build_ultra_sans.py` — the Inter experiment (not adopted)
 

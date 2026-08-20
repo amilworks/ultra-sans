@@ -13,8 +13,8 @@
     "Designed by Amil Khan \u00b7 UCSB ECE"
   ],
   "font_inputs": {
-    "fonts/UltraSans-Variable.woff2": "f060de034541b34034450670bc9becf7c0640f57f2c23dff311ca04a7ff5c97d",
-    "fonts/UltraSans-Italic-Variable.woff2": "26470a9271f845356cfd113a15e5df9e623d440bacab5498e45ad16051e5771d"
+    "fonts/UltraSans-Variable.woff2": "b7fff4a81ec342f76d4a88625a450699112a94a2e3280e8d4ad366adbe01221c",
+    "fonts/UltraSans-Italic-Variable.woff2": "f136650cad07ed6c74ef2bdaf580cba947f14ef4d4978d27d2063ab72d1783d4"
   },
   "exports": {
     "light": {
@@ -26,7 +26,7 @@
       "sha256": "d0d3f3c76f9fd851d96c4c127f866c5dc39dded05867b10eb6e77d18ab10ac5c"
     }
   },
-  "renderer": "Google Chrome 151.0.7922.138",
+  "renderer": "Google Chrome 151.0.7922.170",
   "render_script": "font-lab/render_readme_hero.py",
   "render_script_sha256": "731315cfe628b72acc01f3a13548d70d5f98db78cd2a9415acd467fd06acc91e"
 }
