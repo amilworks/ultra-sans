@@ -29,14 +29,15 @@ feature).
 
 Built by `font-lab/build_ultra_tabular.py`, which fetches the upstream
 masters, verifies them against the digests below, performs the feature additions
-and reference C/O/G, lowercase `s`, and question-mark redraws, renames the
+and reference C/O/G, lowercase `s`, and question-mark redraws, plus the 0.102
+text-letter refinements and optical fitting, renames the
 family, and emits WOFF2. The build is byte-reproducible (`head.modified` pinned
 to upstream), so the output digests below are stable and re-derivable.
 
 | Asset | Style | Variable axes | Bytes | SHA-256 |
 | --- | --- | --- | ---: | --- |
-| `UltraSans-Variable.woff2` | normal | `wght` 100–1000; `opsz` 9–40 | 127248 | `b7fff4a81ec342f76d4a88625a450699112a94a2e3280e8d4ad366adbe01221c` |
-| `UltraSans-Italic-Variable.woff2` | italic | `wght` 100–1000; `opsz` 9–40 | 155152 | `f136650cad07ed6c74ef2bdaf580cba947f14ef4d4978d27d2063ab72d1783d4` |
+| `UltraSans-Variable.woff2` | normal | `wght` 100–1000; `opsz` 9–40 | 127948 | `010af5bb563d0d389cfecf6408d12838a74504dc07ef2d3497d5ea4446c48ebf` |
+| `UltraSans-Italic-Variable.woff2` | italic | `wght` 100–1000; `opsz` 9–40 | 155924 | `186618574642e55a7905b8978b5b77eb2b9790270222f2d2a097e80af4e1f3f9` |
 
 Derived from these upstream DM Sans masters:
 
@@ -57,33 +58,31 @@ verifies both the new authorship metadata and the protected upstream records.
 
 ### What was added, and why it is safe
 
-The numeric feature does not alter source outlines: each tabular digit is a
-**composite** of the original digit, recentred inside a shared advance, so the
-base figure and all of its variation are inherited. The deliberate exceptions
-are the documented `C O G Q Ø`, lowercase `s`, and question-mark redraws
-below.
+The default proportional digits are unchanged. Nine tabular digits are
+**composites** of the original digits, recentred inside a shared advance.
+Version 0.102 gives `one.tnum` a dedicated footed outline to balance its ink
+inside that wide cell. The 0.102 `a/e/g/R/S` refinements and capital fitting are
+documented in [REFINEMENTS-0102.md](REFINEMENTS-0102.md).
 
 Three measured facts underpin the construction, all re-checked by the build:
 
 1. **`0` is the widest digit at every axis location** (verified over opsz 9–40 ×
    wght 100–1000). So the tabular advance is exactly `advance(zero)` — a quantity
    read from the font, not modelled.
-2. **Advances flow from gvar phantom points; HVAR is dropped.** The italic's
-   HVAR diverged from its shipped phantom deltas by up to 4 units on some glyphs,
-   so the build rebuilds every glyph's phantom advance deltas from HVAR-true
-   advances sampled at all 12 master locations (verified exact afterwards), then
-   removes HVAR. Every glyph — original, tabular, grafted — carries its advance
-   the same way.
+2. **Advances flow from gvar phantom points; HVAR is dropped.** The build checks
+   HVAR-true advances independently for both sources at all 12 masters, repairs
+   phantom deltas if needed, verifies exact agreement, then removes HVAR. The
+   current pinned sources need no repairs. Instance-cache keys include the
+   source digest so upright and italic cannot share a cached result.
 3. The centring shift is a *linear* function of the two advances, and gvar deltas
    are additive, so the shift's deltas are that same linear combination of the
    base digits' advance deltas — again exact, with no modelling.
 
-Digits are centred on their **ink**, not their advance box; centring the advance
-box left `1` 44 units off centre in its cell. The ink correction is near-constant
-across the axes (worst drift 10 units, 0.15px at 15px), so it is applied
-statically. Residual off-centring is ≤8 units (0.12px at 15px) across the weights
-Ultra actually uses, rising to 21 units only at wght 1000 / opsz 40, which Ultra
-never renders.
+Digits are centred on their **ink**, not their advance box. Composite figures
+retain the original near-constant ink correction. The new tabular one is
+ink-centred at each authored master; the off-master suite limits centring
+drift to 6.25 units (0.1px at 16px). All ten figures retain exactly the same
+advance at each tested location.
 
 Default figures remain **proportional**, as they should for prose; the tabular
 set is reached only through `tnum`, which is what `font-variant-numeric:
@@ -121,15 +120,17 @@ of DM Sans's 12 `wght × opsz` master locations, the build solves the matching
 Inter optical size, solves Inter's weight again against DM's capital-round side
 stroke, scales to DM's round overshoot height, and shears italic outlines the
 0.6° needed to land on DM's −10° angle. `C O G Q Ø` are written into the
-existing DM glyph slots, retaining their names, original DM advances, and DM ink
-centres. GPOS coverage, line lengths, and surrounding spacing therefore remain
-stable while the silhouettes change. DM Sans Mono is used as the 10px
+existing DM glyph slots, retaining their names and GPOS coverage. In 0.102,
+individual advances and ink centres are refitted to recover part of the extra
+air around those narrowed outlines. Q/Ø use the O bowl's adjustment, excluding
+their diagonal overhang; dependent accents receive the same centre/advance
+delta. Capital-containing line lengths may therefore change. DM Sans Mono is used as the 10px
 G-bar clarity check, not an outline donor; its compressed proportions belong in
 code, not proportional body text.
 
 All samples share point structure before gvar deltas are emitted. Build-time
 verification checks the reference proportions, DM-matched stroke and overshoot,
-unchanged advances, and the original mark-to-bowl relationship in `Ç Ö Ğ`
+bounded advance changes, and the original mark-to-bowl relationship in `Ç Ö Ğ`
 across regular, italic, text, display, and axis extremes. `Q` and `Ø` follow the
 same bowl system so the change does not stop at the three specimen letters.
 

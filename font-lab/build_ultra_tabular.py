@@ -1,6 +1,6 @@
 """Ultra Sans — DM Sans with reference-matched geometry and product features.
 
-Six product needs are handled in the font rather than around it:
+Product needs handled in the font rather than around it:
 
 **Tabular figures.** DM Sans ships no `tnum` feature and proportional digits
 (310/1000em spread), so `font-variant-numeric: tabular-nums` had nothing to
@@ -16,7 +16,12 @@ two-axis design space, extending a one-axis graft into a wght x opsz grid.
 **Round capitals.** The supplied 10–11px reference is closest to Inter's
 optically corrected C/O/G, not the superseded perfect-circle construction. This
 build redraws C/O/G/Q/Oslash from matching Inter masters, then fits them to DM's
-round-cap stroke and overshoot while retaining every DM advance and ink centre.
+round-cap stroke and overshoot. Version 0.102 refits their sidebearings/advances
+to the narrower ink, carrying the same adjustment into dependent accents.
+
+**Defining text letters.** Bounded a/e aperture and g counter/link edits are
+strongest at text optical sizes. R gains a lightly bowed leg and S's terminal
+cuts relate to the approved lowercase s. The simple I stays unchanged.
 
 **Lowercase `s`.** The supplied small-text reference uses a narrower, more
 asymmetric skeleton than DM Sans: the smaller upper bowl, taut diagonal spine,
@@ -51,13 +56,14 @@ Three measured facts make it far simpler than it looks.
    quantity that has to be modelled — it is exactly `advance(zero, L)`.
 
 2. **Advances flow from gvar phantom points.** Upstream HVAR is the rendering
-   truth, but italic HVAR differs from the shipped phantoms by up to four units.
+   truth, so agreement with the shipped phantoms is checked independently for
+   each source (the instance cache includes the source digest).
    The build samples HVAR-true advances at all 12 masters, reconstructs every
    glyph's phantom deltas from those samples, verifies them, then drops HVAR.
    New glyphs therefore need no HVAR delta-set surgery. Because of (1), each
    `.tnum` glyph simply carries `zero`'s advance deltas on its own phantoms.
 
-3. Only the *centring shift* genuinely varies, so each `.tnum` glyph is a
+3. Except for the authored `one.tnum`, each `.tnum` glyph is a
    **composite** with a single component pointing at the base digit. A composite
    inherits the base outline's own variation automatically, so gvar only has to
    move one point: the component offset. That is 1 real point + 4 phantom
@@ -66,6 +72,8 @@ Three measured facts make it far simpler than it looks.
 
 Anything the base digits do across the axes — and they vary over 11 gvar tuples
 with intermediate regions — is inherited rather than reimplemented.
+`one.tnum` is a dedicated compatible outline with a foot and the same zero
+advance. The default proportional one is not modified.
 
 ## How the Greek graft handles two axes
 
@@ -106,6 +114,13 @@ from fontTools.ttLib.tables._g_l_y_f import Glyph, GlyphComponent
 from fontTools.ttLib.tables.TupleVariation import TupleVariation
 from fontTools.varLib import instancer
 from fontTools.varLib.models import VariationModel
+
+from glyph_refinements import (
+    REFINED_LETTERS,
+    refine_points,
+    round_advance_delta,
+    tabular_one_points,
+)
 
 
 def scanline_stem(font: TTFont, ch: str, y: float) -> float | None:
@@ -197,7 +212,7 @@ ROOT = Path(__file__).resolve().parent.parent
 BUILD_DIR = ROOT / "fonts"
 CACHE_DIR = ROOT / ".cache" / "sources"
 
-FONT_VERSION = "0.101"
+FONT_VERSION = "0.102"
 FONT_AUTHOR = "Amil Khan"
 FONT_AFFILIATION = (
     "PhD student in the Department of Electrical and Computer Engineering at the "
@@ -238,12 +253,12 @@ SOURCES = [
 
 EXPECTED_OUTPUTS = {
     "UltraSans-Variable.woff2": (
-        127_248,
-        "b7fff4a81ec342f76d4a88625a450699112a94a2e3280e8d4ad366adbe01221c",
+        127_948,
+        "010af5bb563d0d389cfecf6408d12838a74504dc07ef2d3497d5ea4446c48ebf",
     ),
     "UltraSans-Italic-Variable.woff2": (
-        155_152,
-        "f136650cad07ed6c74ef2bdaf580cba947f14ef4d4978d27d2063ab72d1783d4",
+        155_924,
+        "186618574642e55a7905b8978b5b77eb2b9790270222f2d2a097e80af4e1f3f9",
     ),
 }
 
@@ -372,7 +387,9 @@ _INSTANCE_CACHE: dict = {}
 
 def _instance(raw: bytes, key, loc: dict) -> TTFont:
     """Instance a VF at a user-space location, cached."""
-    ck = (key, tuple(sorted(loc.items())))
+    # Logical labels such as dm+h are reused for both styles. Including the
+    # source digest prevents the upright cache from contaminating italic math.
+    ck = (hashlib.sha256(raw).digest(), key, tuple(sorted(loc.items())))
     if ck not in _INSTANCE_CACHE:
         f = TTFont(io.BytesIO(raw), recalcTimestamp=False)
         instancer.instantiateVariableFont(f, loc, inplace=True)
@@ -696,8 +713,9 @@ def _recenter_base_composites(
         ]
         for index in accent_indices:
             glyph.components[index].x += round(center_deltas[0])
-        advance, lsb = hmtx[name]
-        hmtx.metrics[name] = (advance + round(advance_deltas[0]), lsb)
+        advance, _ = hmtx[name]
+        glyph.recalcBounds(glyf)
+        hmtx.metrics[name] = (advance + round(advance_deltas[0]), glyph.xMin)
         component_count = len(glyph.components)
         tuples = {
             tuple(sorted((key, tuple(value)) for key, value in variation.axes.items())): variation
@@ -819,9 +837,9 @@ def redraw_round_capitals(
     an Inter instance that matches DM Sans's round-cap height and stroke, retain
     Inter's own optical proportions, and write fresh compatible C/O/G/Q/Oslash
     outlines into the existing DM glyph slots. Glyph names — and therefore
-    kerning and substitution coverage — stay unchanged. DM advances and ink
-    centres stay fixed, so existing spacing and accented-composite placement do
-    not move when the silhouettes change.
+    kerning and substitution coverage — stay unchanged. Advances recover part
+    of the space introduced by the narrower ink; ink and dependent accents move
+    by half that delta. Q/Ø fitting uses the O bowl, not diagonal overhangs.
 
     DM Sans supplies the family metrics and two-axis rhythm; Inter supplies the
     reference-matched round skeleton; DM Sans Mono is deliberately a diagnostic
@@ -889,7 +907,7 @@ def redraw_round_capitals(
             scale_y,
             _,
             _,
-        ) in plans:
+        ), (_, (_, optical_size)) in zip(plans, MASTER_GRID):
             inter_name = inter_instance.getBestCmap()[ord(char)]
 
             def transform(point, sx=scale_x, sy=scale_y):
@@ -914,12 +932,24 @@ def redraw_round_capitals(
             new_center = (
                 min(point[0] for point in coordinates) + max(point[0] for point in coordinates)
             ) / 2
-            center_delta = old_center - new_center
+            old_width = max(p[0] for p in old_points) - min(p[0] for p in old_points)
+            new_width = max(p[0] for p in coordinates) - min(p[0] for p in coordinates)
+            if char in "QØ":
+                # Fit the bowl, not the diagonal's overhang (especially Ø in
+                # italic). Related rounds must receive the same O adjustment.
+                dm_o = dm_instance.getBestCmap()[ord("O")]
+                old_o, _, _ = dm_instance["glyf"][dm_o].getCoordinates(dm_instance["glyf"])
+                inter_o = inter_instance.getBestCmap()[ord("O")]
+                new_o, _, _, _ = _pen_arrays(inter_instance, inter_o, transform)
+                old_width = max(p[0] for p in old_o) - min(p[0] for p in old_o)
+                new_width = max(p[0] for p in new_o) - min(p[0] for p in new_o)
+            advance_delta = round_advance_delta(char, old_width, new_width, optical_size)
+            center_delta = old_center - new_center + advance_delta / 2
             coordinates = [(point[0] + center_delta, point[1]) for point in coordinates]
             old_advance = dm_instance["hmtx"][dm_instance.getBestCmap()[ord(char)]][0]
-            samples.append((coordinates, ends, flags, old_advance))
-            center_shifts.append(0.0)
-            advance_shifts.append(0.0)
+            samples.append((coordinates, ends, flags, old_advance + advance_delta))
+            center_shifts.append(advance_delta / 2)
+            advance_shifts.append(advance_delta)
 
         _replace_outline(font, base_name, samples, model)
         composite_count += _recenter_base_composites(
@@ -941,9 +971,48 @@ def redraw_round_capitals(
                 f"<- Inter({inter_weight:3d},{inter_opsz:2d})"
             )
     report.append(
-        f"    redrew {'/'.join(ROUND_CAP_CHARS)} at 12 masters; "
+        f"    redrew and optically fitted {'/'.join(ROUND_CAP_CHARS)} at 12 masters; "
         f"{composite_count} composites re-centred"
     )
+
+
+def refine_defining_letters(font: TTFont, raw: bytes, italic: bool, report: list[str]) -> None:
+    """Optical text details and signature R/S; preserve default metrics."""
+    model = VariationModel([normalized for normalized, _ in MASTER_GRID])
+    for char in REFINED_LETTERS:
+        samples = []
+        expected_topology = None
+        for _, (weight, optical_size) in MASTER_GRID:
+            source = _instance(raw, "defining", {"wght": weight, "opsz": optical_size})
+            name = source.getBestCmap()[ord(char)]
+            coordinates, ends, flags = source["glyf"][name].getCoordinates(source["glyf"])
+            points, ends, flags = refine_points(
+                char, coordinates, ends, flags, _measures(source)["stem"], optical_size, italic
+            )
+            topology = (len(points), tuple(ends), flags)
+            if expected_topology is None:
+                expected_topology = topology
+            elif topology != expected_topology:
+                raise SystemExit(f"{char}: refinement topology diverged between masters")
+            samples.append((points, ends, flags, source["hmtx"][name][0]))
+        _replace_outline(font, font.getBestCmap()[ord(char)], samples, model)
+    report.append("    refined a/e/g text apertures and R/S signature strokes at all 12 masters")
+
+
+def draw_tabular_one(font: TTFont, raw: bytes, italic: bool, report: list[str]) -> None:
+    """Replace only one.tnum, leaving one and all default figures untouched."""
+    model = VariationModel([normalized for normalized, _ in MASTER_GRID])
+    samples = []
+    for _, (weight, optical_size) in MASTER_GRID:
+        source = _instance(raw, "tabular-one", {"wght": weight, "opsz": optical_size})
+        cmap = source.getBestCmap()
+        coords, ends, flags = source["glyf"][cmap[ord("1")]].getCoordinates(source["glyf"])
+        advance = source["hmtx"][cmap[ord("0")]][0]
+        points, ends, flags = tabular_one_points(coords, ends, flags, advance, italic)
+        samples.append((points, ends, flags, advance))
+    name = font.getBestCmap()[ord("1")] + ".tnum"
+    _replace_outline(font, name, samples, model)
+    report.append("    authored a footed tabular-only 1; proportional one remains unchanged")
 
 
 def redraw_lowercase_s(
@@ -1705,8 +1774,9 @@ def rename(font: TTFont, style: str) -> None:
         "Greek grafted from weight- and proportion-matched Inter instances across "
         "the full two-axis design space, reference-matched C/O/G/Q/Oslash and "
         "lowercase s plus question/inverted-question redrawn from fitted Inter "
-        "instances, and a generated slashed-zero alternate (zero). Remaining DM "
-        "outlines are retained. "
+        "instances, optically refitted capital spacing, refined a/e/g/R/S, "
+        "a dedicated footed tabular one, and a generated slashed-zero alternate "
+        "(zero). Remaining DM outlines are retained. "
         "Inter-derived glyphs: Copyright "
         "2016 The Inter Project Authors (https://github.com/rsms/inter), SIL OFL "
         f"1.1, no Reserved Font Name. {FONT_AUTHORSHIP_NOTE}"
@@ -2173,7 +2243,9 @@ def build_one(url_name: str, local_name: str, sha256: str, dst_name: str, style:
         style == "italic",
         report,
     )
+    refine_defining_letters(font, raw, style == "italic", report)
     mapping = build_tnum_glyphs(font, raw)
+    draw_tabular_one(font, raw, style == "italic", report)
     add_feature(font, "tnum", mapping)
     slash_mapping = add_slashed_zero(font, raw, report)
     add_feature(font, "zero", slash_mapping)

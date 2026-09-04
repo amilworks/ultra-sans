@@ -5,7 +5,7 @@ derivative typefaces without a font editor or proprietary outline source.
 
 | Script | Base | What it does | Status |
 | --- | --- | --- | --- |
-| `build_ultra_tabular.py` | DM Sans + Inter | `tnum` + Greek graft + reference C/O/G, `s`, and question marks + dormant slashed zero | **ADOPTED — the shipping product face (Ultra Sans)** |
+| `build_ultra_tabular.py` | DM Sans + Inter | `tnum` + Greek + custom rounds/`s`/`?` + a/e/g/R/S refinements + dormant slashed zero | **ADOPTED — the shipping product face (Ultra Sans)** |
 | `build_ultra_sans.py` | Inter v4.1 | Bakes Inter's alternates in as defaults | Explored, never adopted |
 
 The adopted build emits the committed release files in `../fonts/`. The Inter
@@ -23,7 +23,8 @@ uv run python font-lab/build_ultra_tabular.py --verify-only
 Stock DM Sans ships **no `tnum` feature** and proportional digits spanning
 310/1000em, so `font-variant-numeric: tabular-nums` had nothing to activate and
 Ultra's right-aligned numeric columns staggered. CSS cannot fix that; it needs
-glyphs. This adds ten `<digit>.tnum` composites plus the feature — and, since
+glyphs. This adds ten `<digit>.tnum` glyphs (nine inherited composites and an
+authored footed `one.tnum`) plus the feature — and, since
 the same rebuild: **104 Greek codepoints grafted from Inter** (solved per master
 location over the wght x opsz grid, horizontal-corrected where Inter's opsz
 saturates), **reference-matched C/O/G, lowercase `s`, and question-mark
@@ -34,10 +35,11 @@ docstring for the full reasoning:
 
 1. **`0` is the widest digit at every axis location** (checked over opsz 9–40 ×
    wght 100–1000), so the tabular advance *is* `advance(zero)`.
-2. **HVAR is dropped after a phantom-advance rebuild** — the italic's HVAR
-   diverged from its phantoms by up to 4 units, so HVAR-true advances are
-   sampled at all 12 master locations, every glyph's phantom deltas are rebuilt
-   from them (verified exact), and HVAR is removed; all advances flow one way.
+2. **HVAR is dropped after phantom-advance verification** — HVAR-true advances
+   are sampled independently for both sources at all 12 master locations.
+   Phantom deltas are repaired when needed and verified exact; the current
+   pinned sources need no repairs. Source-digest cache identity prevents
+   upright/italic instances from being confused. All advances then flow one way.
 3. The centring shift is linear in the advances and gvar deltas are additive, so
    the shift's deltas are the same linear combination of the base digits'.
 
@@ -48,9 +50,9 @@ units (7%) at opsz 40 / wght 1000. And leaving the four phantom points `None`
 pins the advance to its default everywhere, which looks fine at 400 and collides
 once weight widens the digits.
 
-Digits are centred on **ink**, not the advance box: centring the box left `1` 44
-units off centre. The ink correction is near-constant across the axes (drift 10
-units, 0.15px at 15px) so it is applied statically.
+Digits are centred on **ink**, not the advance box. In 0.102, `one.tnum` is
+independently ink-centred at every master; interpolated drift stays below 0.1px
+at 16px in the regression grid. Default proportional `1` is untouched.
 
 Builds are byte-reproducible (`recalcTimestamp=False`). The builder pins each
 output's size and SHA-256 digest in addition to inspecting its OpenType tables,
@@ -73,18 +75,32 @@ roles:
   candidates.
 - **DM Sans** remains the typeface system: each Inter master is weight-solved
   to DM's round-cap stroke and scaled to its overshoot height, while the
-  original DM advance and optical centre stay fixed. Kerning coverage and line
-  lengths therefore do not move.
+  0.102 fitting recovers part of the air introduced by narrower outlines.
+  Kerning coverage stays intact; capital-containing line lengths can change.
+  Q/Ø fitting follows the O bowl, not the diagonal overhang.
 - **DM Sans Mono** is the 10px diagnostic for G-bar clarity, not an
   outline donor. Its compressed widths are useful in code but would reduce
   recognition in proportional body text.
 
 The roman and italic use the same construction. Point structure is checked
 before variation deltas are written; the build then verifies C/O/G proportions,
-stroke agreement, cap overshoot, unchanged advances, and the mark-to-bowl
+stroke agreement, cap overshoot, bounded advance changes, and the mark-to-bowl
 relationships in `Ç Ö Ğ` across the axis grid. The build's verification checks
 these invariants at every master; use `index.html` at 10–16px for the
 final raster review.
+
+### 0.102 defining-letter refinements
+
+`glyph_refinements.py` describes bounded edits on SHA-pinned source topology:
+more open text-size `a/e`, an expanded lower `g` counter and relaxed link, a
+lightly bowed `R` leg, and `S` exits related to the approved lowercase `s`.
+All 12 masters and both styles use the recipe. The approved `I`, `s`, `?`,
+`¿`, base `n/o`, and proportional digits remain unchanged.
+
+Run `make check` for protected-outline and interpolation regression tests.
+Run `make proof` to regenerate [the before/after proof](refinements.html),
+including isolated rounder/circular O/o studies. These alternatives are not
+installed in the release fonts. See [construction notes](../docs/REFINEMENTS-0102.md).
 
 ### Lowercase `s`: sentence rhythm at text size
 

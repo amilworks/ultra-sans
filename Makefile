@@ -1,4 +1,4 @@
-.PHONY: sync build verify check reproduce specimen hero
+.PHONY: sync build verify check reproduce specimen hero proof
 
 sync:
 	uv sync --frozen
@@ -11,6 +11,7 @@ verify:
 
 check:
 	uv run python -m compileall -q font-lab
+	uv run python -m unittest discover -s font-lab -p 'test_*.py' -v
 	uv run python font-lab/render_readme_hero.py --verify-only
 	$(MAKE) verify
 
@@ -23,3 +24,6 @@ specimen:
 
 hero:
 	uv run python font-lab/render_readme_hero.py
+
+proof:
+	uv run python font-lab/build_refinement_proof.py

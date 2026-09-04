@@ -13,20 +13,20 @@
     "Designed by Amil Khan \u00b7 UCSB ECE"
   ],
   "font_inputs": {
-    "fonts/UltraSans-Variable.woff2": "b7fff4a81ec342f76d4a88625a450699112a94a2e3280e8d4ad366adbe01221c",
-    "fonts/UltraSans-Italic-Variable.woff2": "f136650cad07ed6c74ef2bdaf580cba947f14ef4d4978d27d2063ab72d1783d4"
+    "fonts/UltraSans-Variable.woff2": "010af5bb563d0d389cfecf6408d12838a74504dc07ef2d3497d5ea4446c48ebf",
+    "fonts/UltraSans-Italic-Variable.woff2": "186618574642e55a7905b8978b5b77eb2b9790270222f2d2a097e80af4e1f3f9"
   },
   "exports": {
     "light": {
       "path": "docs/assets/ultra-sans-hero-light.png",
-      "sha256": "068fe3639cf7619bb1bb49cd66db2473b40c4cb2d41050c8309184daf36815da"
+      "sha256": "0ae402bda75341eec651bfa262ae25c90f63808a48f34c3ffdf5710e43c01604"
     },
     "dark": {
       "path": "docs/assets/ultra-sans-hero-dark.png",
-      "sha256": "d0d3f3c76f9fd851d96c4c127f866c5dc39dded05867b10eb6e77d18ab10ac5c"
+      "sha256": "d67728d25565e3459807a17a8a311901acb5263a959819ab1c58357f402403e0"
     }
   },
-  "renderer": "Google Chrome 151.0.7922.170",
+  "renderer": "Google Chrome 152.0.7977.82",
   "render_script": "font-lab/render_readme_hero.py",
   "render_script_sha256": "731315cfe628b72acc01f3a13548d70d5f98db78cd2a9415acd467fd06acc91e"
 }
