@@ -13,11 +13,11 @@ one global 96.4% scale cannot weight-match per master. This build grafts the
 Greek block from Inter directly into the font, solved per region of the
 two-axis design space, extending a one-axis graft into a wght x opsz grid.
 
-**Round capitals.** The supplied 10–11px reference is closest to Inter's
-optically corrected C/O/G, not the superseded perfect-circle construction. This
-build redraws C/O/G/Q/Oslash from matching Inter masters, then fits them to DM's
-round-cap stroke and overshoot. Version 0.102 refits their sidebearings/advances
-to the narrower ink, carrying the same adjustment into dependent accents.
+**Round letters.** Inter supplies fitted C/G and the initial capital bowls.
+Version 0.103 adopts the approved circular-outer-contour O/o study, including
+Q/Ø/ø bowls and dependent accents. Independent side/top strokes preserve optical
+contrast, while italic circles are constructed in a ten-degree slanted frame.
+Advances follow the wider ink, retaining the previously approved side-space.
 
 **Defining text letters.** Bounded a/e aperture and g counter/link edits are
 strongest at text optical sizes. R gains a lightly bowed leg and S's terminal
@@ -115,6 +115,7 @@ from fontTools.ttLib.tables.TupleVariation import TupleVariation
 from fontTools.varLib import instancer
 from fontTools.varLib.models import VariationModel
 
+from circular_geometry import CIRCULAR_LETTERS, ITALIC_SHEAR, box as contour_box, circular_points
 from glyph_refinements import (
     REFINED_LETTERS,
     refine_points,
@@ -212,7 +213,7 @@ ROOT = Path(__file__).resolve().parent.parent
 BUILD_DIR = ROOT / "fonts"
 CACHE_DIR = ROOT / ".cache" / "sources"
 
-FONT_VERSION = "0.102"
+FONT_VERSION = "0.103"
 FONT_AUTHOR = "Amil Khan"
 FONT_AFFILIATION = (
     "PhD student in the Department of Electrical and Computer Engineering at the "
@@ -253,12 +254,12 @@ SOURCES = [
 
 EXPECTED_OUTPUTS = {
     "UltraSans-Variable.woff2": (
-        127_948,
-        "010af5bb563d0d389cfecf6408d12838a74504dc07ef2d3497d5ea4446c48ebf",
+        127_956,
+        "dfbb838d92514a9fcdb793c47c9786b8e7959924ab80ae059baf1cc9875b87bc",
     ),
     "UltraSans-Italic-Variable.woff2": (
-        155_924,
-        "186618574642e55a7905b8978b5b77eb2b9790270222f2d2a097e80af4e1f3f9",
+        156_160,
+        "2a93fa88a2804a1e1d0def9ea3bf11a0367a4ee1dc3893d297e90170ab6a2608",
     ),
 }
 
@@ -841,6 +842,9 @@ def redraw_round_capitals(
     of the space introduced by the narrower ink; ink and dependent accents move
     by half that delta. Q/Ø fitting uses the O bowl, not diagonal overhangs.
 
+    This is the pre-circle scaffold. The subsequent 0.103 circular-bowl pass
+    retains C/G exactly and adopts the selected O/o construction for O/Q/Ø.
+
     DM Sans supplies the family metrics and two-axis rhythm; Inter supplies the
     reference-matched round skeleton; DM Sans Mono is deliberately a diagnostic
     reference only, because importing its compressed proportions would damage
@@ -997,6 +1001,37 @@ def refine_defining_letters(font: TTFont, raw: bytes, italic: bool, report: list
             samples.append((points, ends, flags, source["hmtx"][name][0]))
         _replace_outline(font, font.getBestCmap()[ord(char)], samples, model)
     report.append("    refined a/e/g text apertures and R/S signature strokes at all 12 masters")
+
+
+def redraw_circular_bowls(font: TTFont, italic: bool, report: list[str]) -> None:
+    """Adopt the 0.102 circle study without altering the other approved letters.
+
+    Snapshot the fully fitted geometry before this pass, rather than sampling
+    original DM outlines or partially replaced composites. This reproduces the
+    selected roman study and gives italic its own stroke measurements.
+    """
+    buffer = io.BytesIO()
+    font.save(buffer)
+    raw = buffer.getvalue()
+    model = VariationModel([normalized for normalized, _ in MASTER_GRID])
+    composite_count = 0
+    for char in CIRCULAR_LETTERS:
+        name = font.getBestCmap()[ord(char)]
+        samples, shifts = [], []
+        expected_topology = None
+        for _, (weight, optical_size) in MASTER_GRID:
+            source = _instance(raw, "pre-circle", {"wght": weight, "opsz": optical_size})
+            coords, ends, flags = source["glyf"][name].getCoordinates(source["glyf"])
+            points, ends, flags, delta = circular_points(char, coords, ends, flags, italic)
+            topology = (len(points), ends, flags)
+            if expected_topology is not None and topology != expected_topology:
+                raise SystemExit(f"circular {char}: incompatible master topology")
+            expected_topology = topology
+            samples.append((points, ends, flags, source["hmtx"][name][0] + delta))
+            shifts.append(delta)
+        _replace_outline(font, name, samples, model)
+        composite_count += _recenter_base_composites(font, name, [delta / 2 for delta in shifts], shifts, model)
+    report.append(f"    circular O/o/Q/Ø/ø bowls at 12 masters; {composite_count} composites re-centred")
 
 
 def draw_tabular_one(font: TTFont, raw: bytes, italic: bool, report: list[str]) -> None:
@@ -1775,7 +1810,9 @@ def rename(font: TTFont, style: str) -> None:
         "the full two-axis design space, reference-matched C/O/G/Q/Oslash and "
         "lowercase s plus question/inverted-question redrawn from fitted Inter "
         "instances, optically refitted capital spacing, refined a/e/g/R/S, "
-        "a dedicated footed tabular one, and a generated slashed-zero alternate "
+        "circular-outer-contour O/o/Q/Oslash/oslash with optically contrasted "
+        "counters and refitted accents, a dedicated footed tabular one, "
+        "and a generated slashed-zero alternate "
         "(zero). Remaining DM outlines are retained. "
         "Inter-derived glyphs: Copyright "
         "2016 The Inter Project Authors (https://github.com/rsms/inter), SIL OFL "
@@ -2141,7 +2178,9 @@ def verify(path: Path, style: str) -> list[str]:
                     f"{style} ({weight},{optical_size}): {char} cap height "
                     f"{heights[char]:.0f} vs DM {upstream_height:.0f}"
                 )
-        for char in ROUND_CAP_CHARS:
+        # C/G retain the 0.102 fit. Circular advances are verified against the
+        # approved study and preserved side-space in test_circular_geometry.py.
+        for char in ("C", "G"):
             name = instance.getBestCmap()[ord(char)]
             upstream_name = upstream.getBestCmap()[ord(char)]
             advance = instance["hmtx"][name][0]
@@ -2161,21 +2200,17 @@ def verify(path: Path, style: str) -> list[str]:
                     f"{stroke:.1f} vs DM {upstream_stroke:.1f}"
                 )
 
+        for char in CIRCULAR_LETTERS:
+            name = instance.getBestCmap()[ord(char)]
+            coords, _, _ = instance["glyf"][name].getCoordinates(instance["glyf"])
+            shear = ITALIC_SHEAR if style == "italic" else 0
+            circle_box = contour_box([(x - shear * y, y) for x, y in coords[:32]])
+            if abs((circle_box[2] - circle_box[0]) - (circle_box[3] - circle_box[1])) > 2:
+                problems.append(f"{style} ({weight},{optical_size}): {char} lost circular outer contour")
+
         if style == "normal":
-            o_aspect = widths["O"] / heights["O"]
-            c_ratio = widths["C"] / widths["O"]
-            g_ratio = widths["G"] / widths["O"]
-            if not 0.77 <= o_aspect <= 0.97:
-                problems.append(
-                    f"normal ({weight},{optical_size}): O aspect {o_aspect:.3f} "
-                    "lost the reference's vertical oval"
-                )
-            if not 0.90 <= c_ratio <= 0.99:
-                problems.append(f"normal ({weight},{optical_size}): C/O width ratio {c_ratio:.3f}")
-            if not 0.92 <= g_ratio <= 0.99:
-                problems.append(f"normal ({weight},{optical_size}): G/O width ratio {g_ratio:.3f}")
             if (weight, optical_size) == (400, 9):
-                target_aspects = {"C": 0.825, "O": 0.864, "G": 0.835}
+                target_aspects = {"C": 0.825, "O": 1.000, "G": 0.835}
                 for char, target in target_aspects.items():
                     aspect = widths[char] / heights[char]
                     if abs(aspect - target) > 0.015:
@@ -2186,6 +2221,7 @@ def verify(path: Path, style: str) -> list[str]:
 
         for composite, base_char in (
             ("Odieresis", "O"),
+            ("odieresis", "o"),
             ("Ccedilla", "C"),
             ("Gbreve", "G"),
             ("sacute", "s"),
@@ -2203,7 +2239,7 @@ def verify(path: Path, style: str) -> list[str]:
                     f"{relationship:.0f} vs DM {upstream_relationship:.0f}"
                 )
     print(
-        f"  verified reference-matched round capitals + lowercase s + question marks ({style})"
+        f"  verified circular bowls + retained C/G, lowercase s and question marks ({style})"
     )
     print(f"  verified Greek graft + slashed zero ({style})")
     return problems
@@ -2244,6 +2280,7 @@ def build_one(url_name: str, local_name: str, sha256: str, dst_name: str, style:
         report,
     )
     refine_defining_letters(font, raw, style == "italic", report)
+    redraw_circular_bowls(font, style == "italic", report)
     mapping = build_tnum_glyphs(font, raw)
     draw_tabular_one(font, raw, style == "italic", report)
     add_feature(font, "tnum", mapping)

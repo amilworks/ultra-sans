@@ -21,8 +21,9 @@ Santa Barbara, for **Ultra**, an agentic system for science. See the formal
 
 [View the live variable specimen →](https://amilworks.github.io/ultra-sans/)
 
-[0.102 before/after proof and circle studies](font-lab/refinements.html) ·
-[Refinement construction notes](docs/REFINEMENTS-0102.md)
+[0.103 circular-form comparison](font-lab/circular.html) ·
+[Circular construction notes](docs/CIRCULAR-0103.md) ·
+[Archived 0.102 refinements and studies](font-lab/refinements.html)
 
 This repository is the font's source of truth. Application CSS, typography
 roles, and product integration tests stay in their consuming repositories.
@@ -33,8 +34,9 @@ roles, and product integration tests stay in their consuming repositories.
 ## What is in the current face
 
 - variable roman and italic, `wght` 100–1000 and `opsz` 9–40
-- reference-matched `C O G Q Ø` geometry across the full design space
-- optically refitted round-cap spacing and accompanying accent placement
+- circular outer `O/o` contours, carried into `Q/Ø/ø` and accented forms
+- optical stroke contrast, width-fitted spacing, and true slanted-circle italic
+- retained reference-matched `C/G` geometry across the full design space
 - text-size `a/e/g` refinements, a lightly bowed `R` leg, and related `S/s` exits
 - a narrower, asymmetric lowercase `s` tuned for sentence rhythm at text sizes
 - open `?` and `¿` forms with centred necks and round dots at every master
@@ -64,8 +66,10 @@ their SHA-256 digests, validates the vendored Inter inputs, rebuilds both WOFF2
 files, checks geometry and OpenType invariants, and confirms the committed byte
 sizes and digests.
 `make check` also runs the refinement regression/interpolation suite and checks
-the README exports. `make proof` rebuilds the embedded comparison against the
-approved 0.101 commit (that commit must be present in the local Git history).
+the README exports. `make proof` rebuilds the circular comparison against the
+approved 0.102 commit. `make proof-0102` rebuilds the archived earlier comparison.
+These source revisions must be present in the local Git history; font builds
+and tests do not require that history.
 
 To inspect the type interactively:
 
@@ -90,8 +94,8 @@ font, export, and browser fingerprints in `docs/assets/readme-hero-manifest.json
 
 | File | Style | Size | SHA-256 |
 | --- | --- | ---: | --- |
-| `fonts/UltraSans-Variable.woff2` | Roman | 127,948 bytes | `010af5bb563d0d389cfecf6408d12838a74504dc07ef2d3497d5ea4446c48ebf` |
-| `fonts/UltraSans-Italic-Variable.woff2` | Italic | 155,924 bytes | `186618574642e55a7905b8978b5b77eb2b9790270222f2d2a097e80af4e1f3f9` |
+| `fonts/UltraSans-Variable.woff2` | Roman | 127,956 bytes | `dfbb838d92514a9fcdb793c47c9786b8e7959924ab80ae059baf1cc9875b87bc` |
+| `fonts/UltraSans-Italic-Variable.woff2` | Italic | 156,160 bytes | `2a93fa88a2804a1e1d0def9ea3bf11a0367a4ee1dc3893d297e90170ab6a2608` |
 
 Basic web use:
 
@@ -117,8 +121,11 @@ Basic web use:
 
 - `font-lab/build_ultra_tabular.py` — adopted, deterministic geometry builder
 - `font-lab/glyph_refinements.py` — bounded, topology-checked 0.102 geometry
+- `font-lab/circular_geometry.py` — adopted 0.103 circular-bowl construction
+- `font-lab/circular.html` — actual-font circular before/after, both styles
+- `font-lab/test_circular_geometry.py` — exact study and circular-family contracts
 - `font-lab/test_glyph_refinements.py` — protected shapes and interpolation tests
-- `font-lab/refinements.html` — actual-font before/after and O/o circle studies
+- `font-lab/refinements.html` — archived 0.102 before/after and O/o circle studies
 - `fonts/` — committed release artifacts
 - `sources/inter/` — exact Inter 4.1 build inputs
 - `index.html` — interactive specimen and GitHub Pages front page

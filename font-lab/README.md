@@ -58,7 +58,11 @@ Builds are byte-reproducible (`recalcTimestamp=False`). The builder pins each
 output's size and SHA-256 digest in addition to inspecting its OpenType tables,
 so a passing verification proves both artifact identity and feature presence.
 
-### Round capitals: reference shape, Ultra metrics
+### Round-cap scaffold: reference shape, Ultra metrics
+
+This section describes the pre-circle scaffold. Version 0.103 retains C/G but
+adopts the selected circular outer contour for O/o and Q/Ø/ø. The previous
+O .865 aspect below is historical; the current O/o outer aspect is 1.000.
 
 `C O G` were previously forced toward perfect circles. That looked geometric
 at display scale but missed the supplied 10–11px reference: its `O` is subtly
@@ -98,9 +102,23 @@ All 12 masters and both styles use the recipe. The approved `I`, `s`, `?`,
 `¿`, base `n/o`, and proportional digits remain unchanged.
 
 Run `make check` for protected-outline and interpolation regression tests.
-Run `make proof` to regenerate [the before/after proof](refinements.html),
-including isolated rounder/circular O/o studies. These alternatives are not
-installed in the release fonts. See [construction notes](../docs/REFINEMENTS-0102.md).
+Run `make proof-0102` to regenerate [the archived before/after proof](refinements.html),
+including the original rounder/circular O/o studies. The circular study is now
+adopted in 0.103; the rounder study remains an alternative. See the historical
+[construction notes](../docs/REFINEMENTS-0102.md).
+
+### 0.103: the selected circular outer contour
+
+`circular_geometry.py` reproduces the exact approved upright O/o study and
+extends it to italic and Q/Ø/ø. The outer contour is circular; the inner counter
+preserves independent side/top stroke thickness. Advances track added width,
+and accents follow the new centre. Italic is built in a ten-degree slanted
+frame. C/G and the other approved defining letters remain unchanged.
+
+Run `make proof` for the [current comparison](circular.html). The regression
+suite checks the original study against immutable 0.102 evidence, protected
+letter shapes and advances, and circular interpolation in both styles. See
+[0.103 construction and verification](../docs/CIRCULAR-0103.md).
 
 ### Lowercase `s`: sentence rhythm at text size
 

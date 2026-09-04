@@ -1,4 +1,4 @@
-"""Contract and interpolation tests for Ultra Sans 0.102."""
+"""Retained 0.102 contracts, including the intentional 0.103 circular update."""
 import json
 import unittest
 import unicodedata
@@ -81,6 +81,8 @@ class RefinementTests(unittest.TestCase):
                 font = build._instance(self.outputs[style], "test-output", {"wght": weight, "opsz": optical})
                 cmap = font.getBestCmap()
                 for char, signature in expected.items():
+                    if char == "o":
+                        continue  # Superseded by the exact approved-circle regression.
                     self.assertEqual(outline_signature(font, cmap[ord(char)]), signature, (style, location, char))
 
     def test_text_openings_increase_without_global_weight_change(self):
@@ -142,7 +144,7 @@ class RefinementTests(unittest.TestCase):
                 output = build._instance(self.outputs[style], "test-output", loc)
                 source = build._instance(self.inputs[style], "test-source", loc)
                 cmap = output.getBestCmap()
-                for char in "COGØaegRS":
+                for char in "COGØoøaegRS":
                     base_name = cmap[ord(char)]
                     base_delta = output["hmtx"][base_name][0] - source["hmtx"][base_name][0]
                     for codepoint, name in source.getBestCmap().items():

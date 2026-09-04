@@ -26,4 +26,7 @@ hero:
 	uv run python font-lab/render_readme_hero.py
 
 proof:
+	uv run python font-lab/build_circular_proof.py
+
+proof-0102:
 	uv run python font-lab/build_refinement_proof.py

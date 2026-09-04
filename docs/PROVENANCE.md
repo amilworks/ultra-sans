@@ -30,14 +30,15 @@ feature).
 Built by `font-lab/build_ultra_tabular.py`, which fetches the upstream
 masters, verifies them against the digests below, performs the feature additions
 and reference C/O/G, lowercase `s`, and question-mark redraws, plus the 0.102
-text-letter refinements and optical fitting, renames the
+text-letter refinements and optical fitting, and the approved 0.103 circular
+O/o/Q/Ø/ø construction, renames the
 family, and emits WOFF2. The build is byte-reproducible (`head.modified` pinned
 to upstream), so the output digests below are stable and re-derivable.
 
 | Asset | Style | Variable axes | Bytes | SHA-256 |
 | --- | --- | --- | ---: | --- |
-| `UltraSans-Variable.woff2` | normal | `wght` 100–1000; `opsz` 9–40 | 127948 | `010af5bb563d0d389cfecf6408d12838a74504dc07ef2d3497d5ea4446c48ebf` |
-| `UltraSans-Italic-Variable.woff2` | italic | `wght` 100–1000; `opsz` 9–40 | 155924 | `186618574642e55a7905b8978b5b77eb2b9790270222f2d2a097e80af4e1f3f9` |
+| `UltraSans-Variable.woff2` | normal | `wght` 100–1000; `opsz` 9–40 | 127956 | `dfbb838d92514a9fcdb793c47c9786b8e7959924ab80ae059baf1cc9875b87bc` |
+| `UltraSans-Italic-Variable.woff2` | italic | `wght` 100–1000; `opsz` 9–40 | 156160 | `2a93fa88a2804a1e1d0def9ea3bf11a0367a4ee1dc3893d297e90170ab6a2608` |
 
 Derived from these upstream DM Sans masters:
 
@@ -62,7 +63,10 @@ The default proportional digits are unchanged. Nine tabular digits are
 **composites** of the original digits, recentred inside a shared advance.
 Version 0.102 gives `one.tnum` a dedicated footed outline to balance its ink
 inside that wide cell. The 0.102 `a/e/g/R/S` refinements and capital fitting are
-documented in [REFINEMENTS-0102.md](REFINEMENTS-0102.md).
+documented in [REFINEMENTS-0102.md](REFINEMENTS-0102.md). Version 0.103 then adopts
+the selected circular-outer-contour O/o study, propagating it to italic, Q/Ø/ø,
+and their accents while retaining optical stroke contrast and side-space. See
+[CIRCULAR-0103.md](CIRCULAR-0103.md).
 
 Three measured facts underpin the construction, all re-checked by the build:
 
@@ -105,7 +109,13 @@ font; italic grafts are additionally sheared 0.6° to DM's −10°. Verified by 
 comparison (λ vs l) and x-height alignment (σ vs x) at Ultra's real tokens
 (wght 440/695, opsz 13), and at the axis extremes.
 
-### Reference-matched C O G Q Ø — drawn at every master
+### Round-cap scaffold — retained C/G, circular O/Q/Ø in 0.103
+
+The following records the pre-circle scaffold. In 0.103 its C/G are retained
+exactly; O/Q/Ø receive the approved circular outer contour, alongside lowercase
+o/ø. Overshoot and independent side/top strokes are preserved, advances follow
+the bowl-width increase, and accents are re-centred. The old O .865 aspect below
+is historical; the adopted upright O/o outer aspect is now 1.000.
 
 The supplied small-size reference is optically corrected rather than
 mathematically circular. Its `O` is subtly vertical; `C` is narrower and more

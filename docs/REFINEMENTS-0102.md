@@ -1,5 +1,9 @@
 # Ultra Sans 0.102 — defining-letter refinements
 
+Historical design record. The circular-outer-contour study discussed below was
+subsequently selected and adopted in [0.103](CIRCULAR-0103.md); the remaining
+0.102 defining-letter refinements are retained.
+
 Designed and authored by **Amil Khan**, PhD student in Electrical and Computer
 Engineering at the University of California, Santa Barbara, for **Ultra**, an
 agentic system for science. This describes the derivative design; upstream

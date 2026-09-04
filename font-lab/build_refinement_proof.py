@@ -14,6 +14,7 @@ import build_ultra_tabular as build
 from record_refinement_baseline import REVISION
 
 HERE = Path(__file__).parent
+REFINED_REVISION = "0820c8e2bdeaf23392c50c9ed18aa6e6d3071a82"
 
 
 def ellipse(cx, cy, rx, ry, clockwise):
@@ -67,11 +68,11 @@ def circle_study(raw, fraction):
     return font
 
 
-def font_data(font):
+def font_data(font, extra_unicodes=()):
     options = subset.Options()
     options.layout_features = ["*"]
     sub = subset.Subsetter(options=options)
-    sub.populate(unicodes=list(range(32, 383)) + [0x2013, 0x2014, 0x2019, 0x2026])
+    sub.populate(unicodes=list(range(32, 383)) + [0x2013, 0x2014, 0x2019, 0x2026] + list(extra_unicodes))
     sub.subset(font)
     font.flavor = "woff2"
     buffer = io.BytesIO()
@@ -84,12 +85,14 @@ def main():
     parser.add_argument("--output", type=Path, default=HERE / "refinements.html")
     args = parser.parse_args()
     template = (HERE / "refinements.template.html").read_text()
-    current_raw = (build.BUILD_DIR / "UltraSans-Variable.woff2").read_bytes()
+    # This is an archived experiment. Never relabel a newer release as 0.102.
+    current_raw = subprocess.check_output(["git", "show", f"{REFINED_REVISION}:fonts/UltraSans-Variable.woff2"], cwd=build.ROOT)
     for style, suffix in [("NORMAL", ""), ("ITALIC", "-Italic")]:
         name = f"UltraSans{suffix}-Variable.woff2"
         before = subprocess.check_output(["git", "show", f"{REVISION}:fonts/{name}"], cwd=build.ROOT)
         template = template.replace(f"{{{{BEFORE_{style}}}}}", font_data(TTFont(io.BytesIO(before), recalcTimestamp=False)))
-        template = template.replace(f"{{{{AFTER_{style}}}}}", font_data(TTFont(build.BUILD_DIR / name, recalcTimestamp=False)))
+        refined = subprocess.check_output(["git", "show", f"{REFINED_REVISION}:fonts/{name}"], cwd=build.ROOT)
+        template = template.replace(f"{{{{AFTER_{style}}}}}", font_data(TTFont(io.BytesIO(refined), recalcTimestamp=False)))
     for key, fraction in [("ROUNDER", .45), ("CIRCLE", 1.0)]:
         template = template.replace(f"{{{{{key}}}}}", font_data(circle_study(current_raw, fraction)))
     if "{{" in template:
